@@ -260,6 +260,12 @@ body::before {
   .gallery-item.tall { grid-row: span 1; }
   .contact-grid { grid-template-columns: 1fr; gap: 40px; }
   .hero-photo { width: 300px; height: 300px; opacity: 0.35; }
+  /* 手机端中文改用苹方，避免宋体过细 */
+  .nav-logo, .hero-title, .hero-desc strong,
+  .section-title, .about-text h3, .trait-card h4,
+  .dog-info .dog-name, .contact-info h4 {
+    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  }
 }
 @media (max-width: 480px) {
   .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 130px; gap: 6px; }
