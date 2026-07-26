@@ -141,6 +141,17 @@ body::before {
 @keyframes floatDown { 0%,100% { transform: translateX(-50%) translateY(0); opacity: 0.5; } 50% { transform: translateX(-50%) translateY(8px); opacity: 1; } }
 .hero-scroll::after { content: ''; width: 1px; height: 32px; background: var(--stone); }
 
+/* Hero 背景圆形照片 */
+.hero-photo {
+  position: absolute; width: 420px; height: 420px;
+  border-radius: 50%; object-fit: cover;
+  opacity: 0.13; pointer-events: none; z-index: 0;
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+  filter: grayscale(30%);
+  /* 无照片时显示渐变圆 */
+  background: radial-gradient(circle, #b8a080 0%, #c8b898 40%, #d8ccb0 70%, transparent 100%);
+}
+
 /* ── 关于我们 ── */
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: center; margin-top: 48px; }
 .about-text h3 { font-family: var(--font-chinese-serif); font-size: 1.6rem; color: var(--charcoal); font-weight: normal; margin-bottom: 20px; letter-spacing: 0.04em; }
@@ -273,6 +284,7 @@ body::before {
 
 <!-- Hero -->
 <section class="hero">
+  <img class="hero-photo" id="heroPhoto" src="" alt="" style="display:none;">
   <div class="hero-content reveal">
     <p class="hero-tag">Giant Schnauzer · 专业繁育</p>
     <h1 class="hero-title">思糯犬舍<span class="en">SNOW KENNEL</span></h1>
@@ -363,6 +375,9 @@ body::before {
  * ╚══════════════════════════════════════════════════╝
  */
 var SITE_DATA = {
+
+  // ── Hero 背景圆形照片（留空显示渐变圆，填路径显示真实照片）──
+  heroPhoto: '',
 
   // ── 犬种特性卡片 ──
   traits: [
@@ -455,6 +470,14 @@ var SITE_DATA = {
   // ── 辅助：判断是否有真实照片 ──
   function hasImg(path) {
     return path && path.trim().length > 0;
+  }
+
+  // ── 渲染 Hero 背景照片 ──
+  var heroPhoto = document.getElementById('heroPhoto');
+  if (hasImg(D.heroPhoto)) {
+    heroPhoto.style.display = '';
+    heroPhoto.style.background = 'none';
+    heroPhoto.src = D.heroPhoto;
   }
 
   // ── 渲染犬种特性 ──
