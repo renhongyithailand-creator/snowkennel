@@ -36,7 +36,7 @@
   --muted: #8c8278;
 
   --font-english: 'Cormorant Garamond', 'Georgia', serif;
-  --font-chinese-heading: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --font-chinese-heading: 'STSong', 'Songti SC', 'Noto Serif SC', 'SimSun', serif;
   --font-chinese-sans: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
 
   --section-pad: clamp(60px, 10vw, 120px);
@@ -144,7 +144,7 @@ body::before {
 /* Hero 背景圆形照片 */
 .hero-photo {
   position: absolute;
-  width: min(500px, 70vw); height: min(500px, 70vw);
+  width: 600px; height: 600px;
   border-radius: 50%; object-fit: cover;
   opacity: 0.28; pointer-events: none; z-index: 0;
   top: 50%; left: 50%; transform: translate(-50%,-50%);
@@ -262,7 +262,7 @@ body::before {
   /* 手机端字体修正 */
   .hero-title { font-size: 2.6rem; letter-spacing: 0.04em; }
   .section-title { font-size: 1.6rem; }
-  .hero-photo { width: 70vw; height: 70vw; opacity: 0.32; }
+  .hero-photo { width: 300px; height: 300px; opacity: 0.35; }
 }
 @media (max-width: 480px) {
   .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 130px; gap: 6px; }
