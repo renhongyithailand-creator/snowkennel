@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>思糯犬舍 SINUO KENNEL — 巨型雪纳瑞专业繁育</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+<!--
+  ╔══════════════════════════════════════════╗
+  ║  思糯犬舍 — 网站 + 小程序 统一数据层  ║
+  ║                                        ║
+  ║  迁移到 uni-app 小程序时：             ║
+  ║  1. CSS 变量 → 复制到 uni.scss        ║
+  ║  2. SITE_DATA → 复制到 data/index.js  ║
+  ║  3. 界面模板 → 用 uni-app 组件重写    ║
+  ║                                        ║
+  ║  数据层和配色可 100% 复用              ║
+  ╚══════════════════════════════════════════╝
+-->
+
+<style>
+/* ============================================
+   [可迁移] CSS 变量 — 配色方案
+   小程序中用 uni.scss 定义同样的变量即可
+   ============================================ */
+:root {
+  --cream: #faf7f2;
+  --warm-white: #f5f0e8;
+  --charcoal: #1e1b18;
+  --brown-gray: #5c5348;
+  --gold: #b8944c;
+  --gold-light: #d4b86a;
+  --stone: #e0d8cc;
+  --stone-light: #ede6db;
+  --muted: #8c8278;
+
+  --font-english: 'Cormorant Garamond', 'Georgia', serif;
+  --font-chinese-serif: 'STSong', 'Songti SC', 'Noto Serif SC', 'SimSun', serif;
+  --font-chinese-sans: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+
+  --section-pad: clamp(60px, 10vw, 120px);
+  --container-max: 1100px;
+  --gap: clamp(20px, 4vw, 48px);
+}
+
+/* ── 基础重置 ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  font-size: 17px;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-chinese-sans);
+  color: var(--brown-gray);
+  background: var(--cream);
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  overflow-x: hidden;
+}
+
+/* 颗粒纹理（网页专属，小程序不需要） */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+.container { max-width: var(--container-max); margin: 0 auto; padding: 0 24px; }
+.section { padding: var(--section-pad) 0; }
+
+/* ── 通用文字样式（小程序中可复用） ── */
+.section-label {
+  font-family: var(--font-english); font-size: 0.85rem; font-style: italic;
+  letter-spacing: 0.08em; color: var(--gold); text-align: center; margin-bottom: 8px;
+}
+.section-title {
+  font-family: var(--font-chinese-serif); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  color: var(--charcoal); text-align: center; font-weight: normal;
+  letter-spacing: 0.04em; line-height: 1.3;
+}
+.section-title .en {
+  display: block; font-family: var(--font-english); font-size: 0.42em;
+  font-style: italic; letter-spacing: 0.12em; color: var(--muted);
+  margin-top: 4px; text-transform: uppercase;
+}
+.divider { width: 48px; height: 1px; background: var(--gold); margin: 24px auto; opacity: 0.5; }
+
+/* ── 导航栏 ── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  padding: 20px 0; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav.scrolled {
+  background: rgba(250,247,242,0.92); backdrop-filter: blur(12px);
+  padding: 12px 0; box-shadow: 0 1px 0 var(--stone-light);
+}
+.nav-inner {
+  max-width: var(--container-max); margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo { font-family: var(--font-chinese-serif); font-size: 1.25rem; color: var(--charcoal); text-decoration: none; letter-spacing: 0.06em; }
+.nav-logo .en { font-family: var(--font-english); font-size: 0.55em; letter-spacing: 0.14em; color: var(--muted); display: block; font-style: italic; }
+.nav-links { display: flex; list-style: none; gap: 36px; align-items: center; }
+.nav-links a { text-decoration: none; color: var(--brown-gray); font-size: 0.82rem; letter-spacing: 0.04em; position: relative; transition: color 0.3s; }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px; background: var(--gold); transition: width 0.3s; }
+.nav-links a:hover { color: var(--charcoal); }
+.nav-links a:hover::after { width: 100%; }
+.nav-cta { font-family: var(--font-english); font-size: 0.78rem; font-style: italic; letter-spacing: 0.06em; padding: 8px 20px; border: 1px solid var(--gold); color: var(--gold) !important; transition: all 0.3s !important; }
+.nav-cta:hover { background: var(--gold); color: var(--cream) !important; }
+.nav-cta::after { display: none !important; }
+.nav-toggle { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; background: none; border: none; z-index: 1001; }
+.nav-toggle span { display: block; width: 24px; height: 1.5px; background: var(--charcoal); transition: all 0.3s; }
+.nav-toggle.active span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
+.nav-toggle.active span:nth-child(2) { opacity: 0; }
+.nav-toggle.active span:nth-child(3) { transform: rotate(-45deg) translate(4px,-4px); }
+
+/* ── Hero ── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  text-align: center; position: relative;
+  background: radial-gradient(ellipse at 50% 40%, rgba(180,160,120,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(140,120,90,0.08) 0%, transparent 50%),
+              var(--cream);
+  padding: 120px 24px 80px;
+}
+.hero::before { content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%; border: 1px solid rgba(180,148,76,0.12); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+.hero-content { position: relative; z-index: 1; max-width: 700px; }
+.hero-tag { font-family: var(--font-english); font-size: 0.8rem; font-style: italic; letter-spacing: 0.16em; color: var(--muted); margin-bottom: 24px; text-transform: uppercase; }
+.hero-title { font-family: var(--font-chinese-serif); font-size: clamp(3rem, 7vw, 5rem); color: var(--charcoal); font-weight: normal; line-height: 1.15; letter-spacing: 0.08em; margin-bottom: 8px; }
+.hero-title .en { display: block; font-family: var(--font-english); font-size: 0.28em; font-style: italic; letter-spacing: 0.18em; color: var(--gold); margin-top: 8px; }
+.hero-line { width: 1px; height: 48px; background: var(--gold); margin: 32px auto; opacity: 0.5; }
+.hero-desc { font-size: 0.95rem; color: var(--muted); letter-spacing: 0.08em; line-height: 1.8; }
+.hero-desc strong { color: var(--charcoal); font-weight: normal; font-family: var(--font-chinese-serif); font-size: 1.05em; }
+.hero-scroll { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--muted); font-family: var(--font-english); font-size: 0.7rem; font-style: italic; letter-spacing: 0.1em; animation: floatDown 2s ease-in-out infinite; }
+@keyframes floatDown { 0%,100% { transform: translateX(-50%) translateY(0); opacity: 0.5; } 50% { transform: translateX(-50%) translateY(8px); opacity: 1; } }
+.hero-scroll::after { content: ''; width: 1px; height: 32px; background: var(--stone); }
+
+/* ── 关于我们 ── */
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); align-items: center; margin-top: 48px; }
+.about-text h3 { font-family: var(--font-chinese-serif); font-size: 1.6rem; color: var(--charcoal); font-weight: normal; margin-bottom: 20px; letter-spacing: 0.04em; }
+.about-text p { color: var(--brown-gray); margin-bottom: 16px; font-size: 0.92rem; line-height: 2; }
+.about-text .highlight { color: var(--gold); font-family: var(--font-english); font-style: italic; font-size: 0.85rem; letter-spacing: 0.06em; display: block; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--stone); }
+.about-image { aspect-ratio: 4/5; background: linear-gradient(135deg, #e8e0d5, #d8cec0, #e0d6c8, #ece4d8); display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.about-image::before { content: ''; position: absolute; inset: 12px; border: 1px solid rgba(255,255,255,0.5); pointer-events: none; }
+.about-image .placeholder-text { font-family: var(--font-english); font-size: 0.75rem; font-style: italic; color: var(--muted); letter-spacing: 0.08em; text-align: center; line-height: 1.6; }
+/* 真实照片：把 background 替换为 url(你的照片) */
+.about-image.has-photo { background: none; }
+.about-image.has-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── 犬种介绍 ── */
+.breed { background: var(--warm-white); }
+.trait-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 48px; }
+.trait-card { text-align: center; padding: 40px 24px; background: var(--cream); border: 1px solid var(--stone-light); transition: all 0.4s; }
+.trait-card:hover { border-color: var(--gold); transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+.trait-icon { font-size: 2.4rem; margin-bottom: 16px; display: block; }
+.trait-card h4 { font-family: var(--font-chinese-serif); font-size: 1.15rem; color: var(--charcoal); font-weight: normal; margin-bottom: 8px; letter-spacing: 0.04em; }
+.trait-card .en-label { font-family: var(--font-english); font-size: 0.75rem; font-style: italic; color: var(--gold); letter-spacing: 0.08em; display: block; margin-bottom: 12px; }
+.trait-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.8; }
+
+/* ── 种犬展示 ── */
+.dog-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; margin-top: 48px; }
+.dog-card { background: var(--warm-white); border: 1px solid var(--stone-light); overflow: hidden; transition: all 0.4s; }
+.dog-card:hover { box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+.dog-photo { aspect-ratio: 4/3; background: linear-gradient(135deg, #ddd5c8, #c8bfb0, #d5ccc0, #e2d9cc); display: flex; align-items: center; justify-content: center; position: relative; }
+.dog-photo .placeholder { font-family: var(--font-english); font-size: 0.75rem; font-style: italic; color: rgba(255,255,255,0.7); letter-spacing: 0.08em; }
+/* 真实照片 */
+.dog-photo.has-photo { background: none; }
+.dog-photo.has-photo img { width: 100%; height: 100%; object-fit: cover; }
+.dog-info { padding: 28px 24px; }
+.dog-info .dog-name { font-family: var(--font-chinese-serif); font-size: 1.3rem; color: var(--charcoal); letter-spacing: 0.04em; }
+.dog-info .dog-name .en { display: block; font-family: var(--font-english); font-size: 0.55em; font-style: italic; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px; }
+.dog-info .dog-title { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.04em; margin-bottom: 12px; display: block; }
+.dog-info .dog-desc { font-size: 0.85rem; color: var(--brown-gray); line-height: 1.8; }
+.dog-stats { display: flex; gap: 24px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--stone-light); }
+.dog-stat { text-align: center; }
+.dog-stat .val { font-family: var(--font-english); font-size: 1.1rem; color: var(--charcoal); letter-spacing: 0.04em; }
+.dog-stat .lbl { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em; }
+
+/* ── 照片墙 ── */
+.gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px; gap: 12px; margin-top: 48px; }
+.gallery-item { position: relative; overflow: hidden; cursor: pointer; transition: all 0.4s; }
+.gallery-item:hover { transform: scale(1.02); z-index: 2; box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+.gallery-item.tall { grid-row: span 2; }
+.gallery-item.wide { grid-column: span 2; }
+.gallery-item .placeholder-label { position: absolute; bottom: 12px; left: 12px; font-family: var(--font-english); font-size: 0.65rem; font-style: italic; color: rgba(255,255,255,0.6); letter-spacing: 0.06em; }
+/* 真实照片 */
+.gallery-item.has-photo { background: none; }
+.gallery-item.has-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── 占位渐变（无真实照片时） ── */
+.g-placeholder-1 { background: linear-gradient(135deg, #c8bfb0, #b8ae9e); }
+.g-placeholder-2 { background: linear-gradient(135deg, #d5ccc0, #c5c0b5); }
+.g-placeholder-3 { background: linear-gradient(135deg, #bdb5a8, #c8c0b4); }
+.g-placeholder-4 { background: linear-gradient(135deg, #ccc4b8, #d0c8bc); }
+.g-placeholder-5 { background: linear-gradient(135deg, #d0c8ba, #bfb7a8); }
+.g-placeholder-6 { background: linear-gradient(135deg, #c4bcae, #d4ccc0); }
+
+/* ── 联系我们 ── */
+.contact { background: var(--charcoal); color: var(--stone); }
+.contact .section-title { color: var(--cream); }
+.contact .section-label { color: var(--gold-light); }
+.contact .divider { background: var(--gold); opacity: 0.4; }
+.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); margin-top: 48px; align-items: start; }
+.contact-info h4 { font-family: var(--font-chinese-serif); font-size: 1.2rem; color: var(--cream); font-weight: normal; margin-bottom: 24px; letter-spacing: 0.04em; }
+.contact-item { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start; }
+.contact-icon { font-size: 1.1rem; flex-shrink: 0; width: 28px; text-align: center; }
+.contact-item .clabel { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; display: block; margin-bottom: 2px; }
+.contact-item .cvalue { font-size: 0.9rem; color: var(--stone); letter-spacing: 0.03em; }
+.qr-placeholder { aspect-ratio: 1; max-width: 180px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-top: 8px; }
+.qr-placeholder .qr-icon { font-size: 3rem; opacity: 0.4; }
+.qr-placeholder .qr-text { font-family: var(--font-english); font-size: 0.65rem; font-style: italic; color: var(--muted); letter-spacing: 0.06em; }
+/* 真实二维码 */
+.qr-placeholder.has-qr { background: none; border: none; }
+.qr-placeholder.has-qr img { width: 100%; height: 100%; object-fit: contain; }
+
+/* ── 页脚 ── */
+.footer { background: var(--charcoal); border-top: 1px solid rgba(255,255,255,0.06); padding: 32px 0; text-align: center; }
+.footer p { font-size: 0.78rem; color: var(--muted); letter-spacing: 0.04em; }
+.footer .brand { font-family: var(--font-english); font-style: italic; color: var(--gold); letter-spacing: 0.08em; }
+
+/* ── 滚动渐入动画（网页专属，小程序不需要） ── */
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; } .reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; } .reveal-d4 { transition-delay: 0.4s; }
+
+/* ── 移动端 ── */
+@media (max-width: 768px) {
+  html { font-size: 16px; }
+  .nav-links { position: fixed; inset: 0; flex-direction: column; justify-content: center; gap: 32px; background: rgba(250,247,242,0.97); backdrop-filter: blur(20px); opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+  .nav-links.open { opacity: 1; pointer-events: auto; }
+  .nav-links a { font-size: 1.1rem; }
+  .nav-toggle { display: flex; }
+  .hero { min-height: 90vh; padding: 100px 20px 60px; }
+  .hero::before { width: 300px; height: 300px; }
+  .about-grid { grid-template-columns: 1fr; }
+  .about-image { aspect-ratio: 3/2; order: -1; }
+  .trait-grid { grid-template-columns: 1fr; gap: 20px; }
+  .dog-grid { grid-template-columns: 1fr; gap: 28px; }
+  .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 150px; gap: 8px; }
+  .gallery-item.wide { grid-column: span 2; }
+  .gallery-item.tall { grid-row: span 1; }
+  .contact-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+@media (max-width: 480px) {
+  .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 130px; gap: 6px; }
+  .gallery-item.wide { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- 导航栏（静态框架） -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">思糯犬舍<span class="en">SINUO KENNEL</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about" data-nav>关于我们</a></li>
+      <li><a href="#breed" data-nav>犬种介绍</a></li>
+      <li><a href="#dogs" data-nav>种犬展示</a></li>
+      <li><a href="#gallery" data-nav>犬舍风采</a></li>
+      <li><a href="#contact" class="nav-cta">联系我们</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="菜单"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content reveal">
+    <p class="hero-tag">Giant Schnauzer · 专业繁育</p>
+    <h1 class="hero-title">思糯犬舍<span class="en">SINUO KENNEL</span></h1>
+    <div class="hero-line"></div>
+    <p class="hero-desc">致力于繁育<strong>体型优美、性格稳定</strong>的巨型雪纳瑞<br>每一只幼犬，都是我们用心呵护的家人</p>
+  </div>
+  <div class="hero-scroll">向下探索</div>
+</section>
+
+<!-- 关于我们（静态框架） -->
+<section class="section" id="about">
+  <div class="container">
+    <p class="section-label reveal">About Us</p>
+    <h2 class="section-title reveal">关于思糯<span class="en">Our Story</span></h2>
+    <div class="divider reveal"></div>
+    <div class="about-grid">
+      <div class="about-text reveal reveal-d1">
+        <h3>以爱之名，繁育品质</h3>
+        <p>思糯犬舍坐落于环境优美的郊外，拥有宽敞的活动空间和专业的犬舍设施。我们专注巨型雪纳瑞单一犬种的繁育与养护，坚持科学喂养、健康优先的理念。</p>
+        <p>每一只种犬均经过严格的健康筛查和性格评估，确保后代不仅拥有标准优美的体型结构，更具备稳定亲人的性格特质。我们相信，优秀的犬只不仅在于外表，更在于与人类家庭的契合。</p>
+        <p>多年来，我们坚持以最高的动物福利标准对待每一只犬只——充足的户外运动、科学的营养配比、定期的兽医检查，以及最重要的——满满的爱与陪伴。</p>
+        <span class="highlight">— Breeding with love, raising with care</span>
+      </div>
+      <div class="about-image reveal reveal-d2" id="aboutPhoto">
+        <span class="placeholder-text">犬舍实拍照片<br>Kennel Photo</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 犬种介绍 — JS 动态渲染 -->
+<section class="section breed" id="breed">
+  <div class="container">
+    <p class="section-label reveal">Breed Introduction</p>
+    <h2 class="section-title reveal">巨型雪纳瑞<span class="en">The Giant Schnauzer</span></h2>
+    <div class="divider reveal"></div>
+    <div class="trait-grid" id="traitGrid"><!-- JS 填充 --></div>
+  </div>
+</section>
+
+<!-- 种犬展示 — JS 动态渲染 -->
+<section class="section" id="dogs">
+  <div class="container">
+    <p class="section-label reveal">Our Dogs</p>
+    <h2 class="section-title reveal">种犬展示<span class="en">Stud Dogs & Dams</span></h2>
+    <div class="divider reveal"></div>
+    <div class="dog-grid" id="dogGrid"><!-- JS 填充 --></div>
+  </div>
+</section>
+
+<!-- 照片墙 — JS 动态渲染 -->
+<section class="section breed" id="gallery">
+  <div class="container">
+    <p class="section-label reveal">Gallery</p>
+    <h2 class="section-title reveal">犬舍风采<span class="en">Our Life & Puppies</span></h2>
+    <div class="divider reveal"></div>
+    <div class="gallery-grid" id="galleryGrid"><!-- JS 填充 --></div>
+  </div>
+</section>
+
+<!-- 联系我们 — JS 动态渲染 -->
+<section class="section contact" id="contact">
+  <div class="container">
+    <p class="section-label reveal">Contact</p>
+    <h2 class="section-title reveal">联系我们<span class="en">Get In Touch</span></h2>
+    <div class="divider reveal"></div>
+    <div class="contact-grid" id="contactGrid"><!-- JS 填充 --></div>
+  </div>
+</section>
+
+<!-- 页脚 -->
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2026 <span class="brand">思糯犬舍 SINUO KENNEL</span> — 巨型雪纳瑞专业繁育</p>
+    <p style="font-size:0.7rem;margin-top:4px;opacity:0.5;">备案号待添加</p>
+  </div>
+</footer>
+
+
+<script>
+/*
+ * ╔══════════════════════════════════════════════════╗
+ * ║  [可迁移] 数据配置文件 — 网站 & 小程序共用    ║
+ * ║                                                ║
+ * ║  修改方式：直接改下面这些 JS 对象的值         ║
+ * ║  照片处理：把 photo 字段改为图片路径即可      ║
+ * ║  迁移时：整段复制到小程序项目的数据文件       ║
+ * ╚══════════════════════════════════════════════════╝
+ */
+var SITE_DATA = {
+
+  // ── 犬种特性卡片 ──
+  traits: [
+    {
+      icon: '🛡️',
+      title: '忠诚护卫',
+      en: 'Loyal Guardian',
+      desc: '天生具有护卫本能，对家人极度忠诚。警觉勇敢却不具攻击性，是理想的工作犬与家庭伴侣犬。'
+    },
+    {
+      icon: '🧠',
+      title: '聪明机敏',
+      en: 'Highly Intelligent',
+      desc: '犬类智商排名前列，学习能力强，服从性好。需要适量的脑力刺激和训练来保持身心平衡。'
+    },
+    {
+      icon: '⚡',
+      title: '活力充沛',
+      en: 'Energetic & Robust',
+      desc: '体格强壮、耐力出众，适合活跃的家庭。每日充足运动能让它们保持愉悦和健康的体态。'
+    }
+  ],
+
+  // ── 种犬列表（数组，想加几只加几只） ──
+  dogs: [
+    {
+      name: '种公 · 名称待定',
+      en: 'Champion Line',
+      title: '中国永久冠军登录 · CH.CN',
+      desc: '体格雄伟，头版标准，被毛刚硬浓密。性格沉稳自信，遗传稳定，后代品质优异。',
+      photo: '',  // ← 填照片路径，如 'images/dog1.jpg'，留空显示占位
+      stats: [
+        { val: '68cm',  label: '肩高' },
+        { val: '47kg',  label: '体重' },
+        { val: 'A/A',   label: '遗传' }
+      ]
+    },
+    {
+      name: '种母 · 名称待定',
+      en: 'European Bloodline',
+      title: '欧洲冠军血系 · INT.CH',
+      desc: '结构匀称，动态流畅，母性极佳。性格温柔亲人，繁育的后代性格稳定、适应力强。',
+      photo: '',  // ← 填照片路径
+      stats: [
+        { val: '62cm',  label: '肩高' },
+        { val: '38kg',  label: '体重' },
+        { val: 'A/B',   label: '遗传' }
+      ]
+    }
+  ],
+
+  // ── 照片墙（数组，想加几张加几张） ──
+  gallery: [
+    { label: '犬舍环境', layout: 'tall', photo: '' },
+    { label: '幼犬日常', layout: '',     photo: '' },
+    { label: '户外活动', layout: 'wide', photo: '' },
+    { label: '训练时光', layout: '',     photo: '' },
+    { label: '赛场风采', layout: 'wide', photo: '' },
+    { label: '温馨时刻', layout: 'tall', photo: '' }
+  ],
+
+  // ── 联系信息 ──
+  contact: {
+    title: '欢迎预约来访',
+    items: [
+      { icon: '📍', label: '犬舍地址',  value: '（请填写您的犬舍地址）' },
+      { icon: '📞', label: '联系电话',  value: '（请填写您的联系电话）' },
+      { icon: '✉️', label: '电子邮箱',  value: 'info@snowkennel.com' },
+      { icon: '💬', label: '微信咨询',  value: '（请填写您的微信号）' }
+    ],
+    qrPhoto: '',  // ← 填微信二维码图片路径
+    qrHint: '扫码添加微信，了解更多犬只信息'
+  }
+
+};
+// ═══════════════ 数据配置结束 ═══════════════
+
+
+/*
+ * ╔══════════════════════════════════════════════════╗
+ * ║  [网页专属] 渲染引擎 — 把数据渲染成 HTML     ║
+ * ║                                                ║
+ * ║  小程序中这部分会用 WXML 模板替代             ║
+ * ║  但上面的 SITE_DATA 和 CSS 变量无需改动       ║
+ * ╚══════════════════════════════════════════════════╝
+ */
+(function() {
+  var D = SITE_DATA;
+
+  // ── 辅助：判断是否有真实照片 ──
+  function hasImg(path) {
+    return path && path.trim().length > 0;
+  }
+
+  // ── 渲染犬种特性 ──
+  var traitGrid = document.getElementById('traitGrid');
+  D.traits.forEach(function(t, i) {
+    var card = document.createElement('div');
+    card.className = 'trait-card reveal reveal-d' + (i + 1);
+    card.innerHTML =
+      '<span class="trait-icon">' + t.icon + '</span>' +
+      '<h4>' + t.title + '</h4>' +
+      '<span class="en-label">' + t.en + '</span>' +
+      '<p>' + t.desc + '</p>';
+    traitGrid.appendChild(card);
+  });
+
+  // ── 渲染种犬 ──
+  var dogGrid = document.getElementById('dogGrid');
+  D.dogs.forEach(function(d, i) {
+    var card = document.createElement('div');
+    card.className = 'dog-card reveal reveal-d' + (i + 1);
+
+    // 照片区域
+    var photoHtml;
+    if (hasImg(d.photo)) {
+      photoHtml = '<div class="dog-photo has-photo"><img src="' + d.photo + '" alt="' + d.name + '"></div>';
+    } else {
+      photoHtml = '<div class="dog-photo"><span class="placeholder">种犬照片<br>Stud Photo</span></div>';
+    }
+
+    // 数据行
+    var statsHtml = d.stats.map(function(s) {
+      return '<div class="dog-stat"><span class="val">' + s.val + '</span><span class="lbl">' + s.label + '</span></div>';
+    }).join('');
+
+    card.innerHTML =
+      photoHtml +
+      '<div class="dog-info">' +
+        '<h3 class="dog-name"><span class="en">' + d.en + '</span>' + d.name + '</h3>' +
+        '<span class="dog-title">' + d.title + '</span>' +
+        '<p class="dog-desc">' + d.desc + '</p>' +
+        '<div class="dog-stats">' + statsHtml + '</div>' +
+      '</div>';
+    dogGrid.appendChild(card);
+  });
+
+  // ── 渲染照片墙 ──
+  var galleryGrid = document.getElementById('galleryGrid');
+  D.gallery.forEach(function(g, i) {
+    var item = document.createElement('div');
+    item.className = 'gallery-item' + (g.layout ? ' ' + g.layout : '');
+
+    if (hasImg(g.photo)) {
+      item.className += ' has-photo';
+      item.innerHTML = '<img src="' + g.photo + '" alt="' + g.label + '">';
+    } else {
+      // 轮换不同色调的占位渐变
+      item.className += ' g-placeholder-' + ((i % 6) + 1);
+      item.innerHTML = '<span class="placeholder-label">' + g.label + '</span>';
+    }
+    galleryGrid.appendChild(item);
+  });
+
+  // ── 渲染联系信息 ──
+  var contactGrid = document.getElementById('contactGrid');
+
+  // 左侧信息
+  var infoDiv = document.createElement('div');
+  infoDiv.className = 'contact-info reveal reveal-d1';
+  var itemsHtml = D.contact.items.map(function(c) {
+    return '<div class="contact-item">' +
+      '<span class="contact-icon">' + c.icon + '</span>' +
+      '<div><span class="clabel">' + c.label + '</span><span class="cvalue">' + c.value + '</span></div>' +
+    '</div>';
+  }).join('');
+  infoDiv.innerHTML = '<h4>' + D.contact.title + '</h4>' + itemsHtml;
+  contactGrid.appendChild(infoDiv);
+
+  // 右侧二维码
+  var qrDiv = document.createElement('div');
+  qrDiv.className = 'reveal reveal-d2';
+  if (hasImg(D.contact.qrPhoto)) {
+    qrDiv.innerHTML =
+      '<div class="qr-placeholder has-qr"><img src="' + D.contact.qrPhoto + '" alt="微信二维码"></div>' +
+      '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">' + D.contact.qrHint + '</p>';
+  } else {
+    qrDiv.innerHTML =
+      '<div class="qr-placeholder"><span class="qr-icon">⬜</span><span class="qr-text">微信二维码<br>WeChat QR</span></div>' +
+      '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">' + D.contact.qrHint + '</p>';
+  }
+  contactGrid.appendChild(qrDiv);
+
+})();
+
+
+/*
+ * ╔══════════════════════════════════════════════════╗
+ * ║  [网页专属] 交互逻辑                           ║
+ * ║  小程序中会用微信 API 替代                     ║
+ * ╚══════════════════════════════════════════════════╝
+ */
+(function() {
+  var nav = document.getElementById('nav');
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
+
+  // 导航滚动效果
+  window.addEventListener('scroll', function() {
+    if (window.scrollY > 60) { nav.classList.add('scrolled'); }
+    else { nav.classList.remove('scrolled'); }
+  }, { passive: true });
+
+  // 移动端菜单
+  navToggle.addEventListener('click', function() {
+    navToggle.classList.toggle('active');
+    navLinks.classList.toggle('open');
+  });
+
+  document.querySelectorAll('[data-nav]').forEach(function(link) {
+    link.addEventListener('click', function() {
+      navToggle.classList.remove('active');
+      navLinks.classList.remove('open');
+    });
+  });
+
+  // 滚动渐入动画
+  var revealEls = document.querySelectorAll('.reveal');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+  revealEls.forEach(function(el) { observer.observe(el); });
+
+  // 初始可见元素立即显示
+  setTimeout(function() {
+    revealEls.forEach(function(el) {
+      if (el.getBoundingClientRect().top < window.innerHeight) {
+        el.classList.add('visible');
+      }
+    });
+  }, 150);
+})();
+</script>
+
+</body>
+</html>
