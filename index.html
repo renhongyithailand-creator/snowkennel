@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>思糯犬舍 SNOW KENNEL — 巨型雪纳瑞专业繁育</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
 
 <!--
   ╔══════════════════════════════════════════╗
@@ -36,7 +36,7 @@
   --muted: #8c8278;
 
   --font-english: 'Cormorant Garamond', 'Georgia', serif;
-  --font-chinese-serif: 'STSong', 'Songti SC', 'Noto Serif SC', 'SimSun', 'KaiTi', serif;
+  --font-chinese-serif: 'Noto Serif SC', 'STSong', 'Songti SC', 'SimSun', serif;
   --font-chinese-sans: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
 
   --section-pad: clamp(60px, 10vw, 120px);
@@ -260,12 +260,6 @@ body::before {
   .gallery-item.tall { grid-row: span 1; }
   .contact-grid { grid-template-columns: 1fr; gap: 40px; }
   .hero-photo { width: 300px; height: 300px; opacity: 0.35; }
-  /* 手机端中文改用苹方，避免宋体过细 */
-  .nav-logo, .hero-title, .hero-desc strong,
-  .section-title, .about-text h3, .trait-card h4,
-  .dog-info .dog-name, .contact-info h4 {
-    font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  }
 }
 @media (max-width: 480px) {
   .gallery-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 130px; gap: 6px; }
