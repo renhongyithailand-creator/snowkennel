@@ -484,22 +484,27 @@ async function saveConfig(id) {
 // ═══════════════════════════════════════════
 async function uploadPhoto(inputId, targetInputId) {
   var fileInput = document.getElementById(inputId)
+  if (!fileInput || !fileInput.files.length) { showMsg('请先选择文件', 'err'); return }
   var file = fileInput.files[0]
-  if (!file) { showMsg('请先选择文件', 'err'); return }
 
   var btn = document.getElementById(inputId + '_btn')
   if (btn) { btn.textContent = '上传中...'; btn.disabled = true }
 
   var fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '')
-  var { data, error } = await sb.storage.from('photos').upload(fileName, file)
+  var { error } = await sb.storage.from('photos').upload(fileName, file)
 
   if (btn) { btn.textContent = '📎 上传'; btn.disabled = false }
 
   if (error) { showMsg('上传失败: ' + error.message, 'err'); return }
 
-  var url = sbUrl + '/storage/v1/object/public/photos/' + fileName
-  document.getElementById(targetInputId).value = url
-  showMsg('上传成功，已填入路径', 'ok')
+  var url = 'https://myzvmmrexkzhasotpjjo.supabase.co/storage/v1/object/public/photos/' + fileName
+  var target = document.getElementById(targetInputId)
+  if (target) {
+    target.value = url
+    target.style.border = '2px solid #4caf50'
+    setTimeout(function(){ target.style.border = '' }, 2000)
+    showMsg('上传成功！', 'ok')
+  }
 }
 
 function uploadBtnHtml(inputId, targetInputId) {
