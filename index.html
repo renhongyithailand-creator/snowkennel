@@ -468,10 +468,13 @@ var SITE_DATA = {
  * ╚══════════════════════════════════════════════════╝
  */
 (function() {
-  // Supabase 客户端
+  // Supabase 客户端（加载失败则跳过数据库）
   var sbUrl = 'https://myzvmmrexkzhasotpjjo.supabase.co'
   var sbKey = 'sb_publishable_nLb9ULPNjSd-nor6JDlTKA_AGAlSFWY'
-  var sb = window.supabase.createClient(sbUrl, sbKey)
+  var sb = null
+  try {
+    if (window.supabase) sb = window.supabase.createClient(sbUrl, sbKey)
+  } catch(e) { sb = null }
 
   // ── 辅助 ──
   function hasImg(path) { return path && path.trim().length > 0 }
@@ -519,8 +522,11 @@ var SITE_DATA = {
     setHtml('footerText', cfg.footer_text)
     // 关于我们正文
     if (cfg.about_text) {
-      var paragraphs = cfg.about_text.split('\n').filter(function(p) { return p.trim() })
-      setHtml('aboutText', paragraphs.map(function(p) { return '<p>' + p.trim() + '</p>' }).join(''))
+      var text = cfg.about_text.replace(/\\\\n/g, '\n').replace(/\\n/g, '\n')
+      var paragraphs = text.split('\n').filter(function(p) { return p.trim() })
+      if (paragraphs.length > 0) {
+        setHtml('aboutText', paragraphs.map(function(p) { return '<p>' + p.trim() + '</p>' }).join(''))
+      }
     }
     // 关于我们照片
     if (hasImg(cfg.about_photo)) {
@@ -623,6 +629,16 @@ var SITE_DATA = {
 
   // ── 主流程：从 Supabase 读取，失败则用本地数据 ──
   async function loadData() {
+    if (!sb) {
+      // Supabase 不可用，直接用本地数据
+      renderDogs(SITE_DATA.dogs)
+      renderGallery(SITE_DATA.gallery)
+      renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
+      var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
+      renderContact(c)
+      renderHeroPhoto(SITE_DATA.heroPhoto)
+      return
+    }
     try {
       // 并行读取 Supabase
       var results = await Promise.allSettled([
