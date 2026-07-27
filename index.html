@@ -529,7 +529,7 @@ var SITE_DATA = {
       wrap.innerHTML = '<img src="' + cfg.about_photo + '" alt="犬舍照片">'
     }
   }
-  function setHtml(id, val) { if (val !== undefined) { var el = document.getElementById(id); if (el) el.innerHTML = val } }
+  function setHtml(id, val) { if (val !== undefined && val !== null && val !== '') { var el = document.getElementById(id); if (el) el.innerHTML = val } }
 
   // ── 渲染 Hero 照片 ──
   function renderHeroPhoto(url) {
