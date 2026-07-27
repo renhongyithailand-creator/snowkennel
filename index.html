@@ -633,72 +633,49 @@ var SITE_DATA = {
   }
 
   // ── 主流程：从 Supabase 读取，失败则用本地数据 ──
-  async function loadData() {
-    if (!sb) {
-      // Supabase 不可用，直接用本地数据
-      renderDogs(SITE_DATA.dogs)
-      renderGallery(SITE_DATA.gallery)
-      renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
-      var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
-      renderContact(c)
-      renderHeroPhoto(SITE_DATA.heroPhoto)
-      return
-    }
-    try {
-      // 并行读取 Supabase
-      var results = await Promise.allSettled([
-        sb.from('dogs').select('*').order('sort_order'),
-        sb.from('gallery').select('*').order('sort_order'),
-        sb.from('contacts').select('*').limit(1).single(),
-        sb.from('site_config').select('*').limit(1).single(),
-        sb.from('breed_traits').select('*').order('sort_order')
-      ])
-
-      // 种犬
-      if (results[0].status === 'fulfilled' && Array.isArray(results[0].value.data) && results[0].value.data.length > 0) {
-        renderDogs(results[0].value.data)
-      } else { renderDogs(SITE_DATA.dogs) }
-
-      // 照片墙
-      if (results[1].status === 'fulfilled' && Array.isArray(results[1].value.data) && results[1].value.data.length > 0) {
-        renderGallery(results[1].value.data)
-      } else { renderGallery(SITE_DATA.gallery) }
-
-      // 联系方式
-      if (results[2].status === 'fulfilled' && results[2].value.data && results[2].value.data.address !== undefined) {
-        renderContact(results[2].value.data)
-      } else {
-        var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
-        renderContact(c)
-      }
-
-      // 网站设置 & Hero
-      if (results[3].status === 'fulfilled' && results[3].value.data && (results[3].value.data.hero_tag || results[3].value.data.about_heading)) {
-        applySiteConfig(results[3].value.data)
-        renderHeroPhoto(results[3].value.data.hero_photo)
-      } else {
-        applySiteConfig(null)
-        renderHeroPhoto(SITE_DATA.heroPhoto)
-      }
-
-      // 犬种特性
-      if (results[4].status === 'fulfilled' && Array.isArray(results[4].value.data) && results[4].value.data.length > 0) {
-        renderTraits(results[4].value.data)
-      } else {
-        renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
-      }
-
-    } catch(e) {
-      renderDogs(SITE_DATA.dogs)
-      renderGallery(SITE_DATA.gallery)
-      renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
-      var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
-      renderContact(c)
-      renderHeroPhoto(SITE_DATA.heroPhoto)
-    }
+  // ── 辅助：SITE_DATA 转联系格式 ──
+  function fallbackContact() {
+    return { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
   }
 
-  loadData()
+  // ── 先用本地数据显示，不怕数据库失败 ──
+  function renderAllFromLocal() {
+    renderDogs(SITE_DATA.dogs)
+    renderGallery(SITE_DATA.gallery)
+    renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
+    renderContact(fallbackContact())
+    renderHeroPhoto(SITE_DATA.heroPhoto)
+  }
+
+  // 立即渲染
+  renderAllFromLocal()
+
+  // ── 数据库可用时，替换为数据库内容 ──
+  if (sb) {
+    Promise.allSettled([
+      sb.from('dogs').select('*').order('sort_order'),
+      sb.from('gallery').select('*').order('sort_order'),
+      sb.from('contacts').select('*').limit(1).single(),
+      sb.from('site_config').select('*').limit(1).single(),
+      sb.from('breed_traits').select('*').order('sort_order')
+    ]).then(function(results) {
+      var ok = function(r) { return r.status === 'fulfilled' && r.value && !r.value.error }
+      var d = function(r) { return r.value ? r.value.data : null }
+      var arr = function(r) { var x = d(r); return Array.isArray(x) && x.length > 0 ? x : null }
+
+      var dogs = arr(results[0])
+      var gallery = arr(results[1])
+      var contact = ok(results[2]) && d(results[2]) && d(results[2]).address !== undefined ? d(results[2]) : null
+      var config = ok(results[3]) && d(results[3]) ? d(results[3]) : null
+      var traits = arr(results[4])
+
+      if (dogs) renderDogs(dogs)
+      if (gallery) renderGallery(gallery)
+      if (contact) renderContact(contact)
+      if (config) { applySiteConfig(config); renderHeroPhoto(config.hero_photo) }
+      if (traits) renderTraits(traits)
+    }).catch(function() {})
+  }
 })();
 
 
