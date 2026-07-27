@@ -413,7 +413,7 @@ async function deleteTrait(id, title) {
 async function loadConfig() {
   const { data } = await sb.from('site_config').select('*').limit(1).single()
   const c = data || {}
-  const f = (key, def) => esc(c[key] !== undefined ? c[key] : def)
+  const f = (key, def) => { var v = c[key]; return esc(v !== undefined && v !== null ? v : def) }
   document.getElementById('configForm').innerHTML = `
     <h3 style="margin-bottom:16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">🖼️ Hero 区域</h3>
     <label>标签文字</label><input id="cf_hero_tag" value="${f('hero_tag','Giant Schnauzer · 专业繁育')}">
