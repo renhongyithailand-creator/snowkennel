@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>思糯犬舍 SNOW KENNEL — 巨型雪纳瑞专业繁育</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!--
   ╔══════════════════════════════════════════╗
@@ -460,117 +461,178 @@ var SITE_DATA = {
 
 /*
  * ╔══════════════════════════════════════════════════╗
- * ║  [网页专属] 渲染引擎 — 把数据渲染成 HTML     ║
- * ║                                                ║
- * ║  小程序中这部分会用 WXML 模板替代             ║
- * ║  但上面的 SITE_DATA 和 CSS 变量无需改动       ║
+ * ║  [网页专属] 渲染引擎 — 优先从 Supabase 读取  ║
+ * ║  数据库连接失败时自动降级使用本地 SITE_DATA   ║
  * ╚══════════════════════════════════════════════════╝
  */
 (function() {
-  var D = SITE_DATA;
+  // Supabase 客户端
+  var sbUrl = 'https://myzvmmrexkzhasotpjjo.supabase.co'
+  var sbKey = 'sb_publishable_nLb9ULPNjSd-nor6JDlTKA_AGAlSFWY'
+  var sb = window.supabase.createClient(sbUrl, sbKey)
 
-  // ── 辅助：判断是否有真实照片 ──
-  function hasImg(path) {
-    return path && path.trim().length > 0;
+  // ── 辅助 ──
+  function hasImg(path) { return path && path.trim().length > 0 }
+
+  // ── 渲染犬种特性（静态内容，不从数据库读）──
+  function renderTraits() {
+    var grid = document.getElementById('traitGrid')
+    SITE_DATA.traits.forEach(function(t, i) {
+      var card = document.createElement('div')
+      card.className = 'trait-card reveal reveal-d' + (i + 1)
+      card.innerHTML =
+        '<span class="trait-icon">' + t.icon + '</span>' +
+        '<h4>' + t.title + '</h4>' +
+        '<span class="en-label">' + t.en + '</span>' +
+        '<p>' + t.desc + '</p>'
+      grid.appendChild(card)
+    })
   }
 
-  // ── 渲染 Hero 背景照片 ──
-  var heroPhoto = document.getElementById('heroPhoto');
-  if (hasImg(D.heroPhoto)) {
-    heroPhoto.style.display = '';
-    heroPhoto.style.background = 'none';
-    heroPhoto.src = D.heroPhoto;
+  // ── 渲染 Hero 照片 ──
+  function renderHeroPhoto(url) {
+    var el = document.getElementById('heroPhoto')
+    if (hasImg(url)) {
+      el.style.display = ''
+      el.style.background = 'none'
+      el.src = url
+    }
   }
-
-  // ── 渲染犬种特性 ──
-  var traitGrid = document.getElementById('traitGrid');
-  D.traits.forEach(function(t, i) {
-    var card = document.createElement('div');
-    card.className = 'trait-card reveal reveal-d' + (i + 1);
-    card.innerHTML =
-      '<span class="trait-icon">' + t.icon + '</span>' +
-      '<h4>' + t.title + '</h4>' +
-      '<span class="en-label">' + t.en + '</span>' +
-      '<p>' + t.desc + '</p>';
-    traitGrid.appendChild(card);
-  });
 
   // ── 渲染种犬 ──
-  var dogGrid = document.getElementById('dogGrid');
-  D.dogs.forEach(function(d, i) {
-    var card = document.createElement('div');
-    card.className = 'dog-card reveal reveal-d' + (i + 1);
-
-    // 照片区域
-    var photoHtml;
-    if (hasImg(d.photo)) {
-      photoHtml = '<div class="dog-photo has-photo"><img src="' + d.photo + '" alt="' + d.name + '"></div>';
-    } else {
-      photoHtml = '<div class="dog-photo"><span class="placeholder">种犬照片<br>Stud Photo</span></div>';
-    }
-
-    // 数据行
-    var statsHtml = d.stats.map(function(s) {
-      return '<div class="dog-stat"><span class="val">' + s.val + '</span><span class="lbl">' + s.label + '</span></div>';
-    }).join('');
-
-    card.innerHTML =
-      photoHtml +
-      '<div class="dog-info">' +
-        '<h3 class="dog-name"><span class="en">' + d.en + '</span>' + d.name + '</h3>' +
-        '<span class="dog-title">' + d.title + '</span>' +
-        '<p class="dog-desc">' + d.desc + '</p>' +
-        '<div class="dog-stats">' + statsHtml + '</div>' +
-      '</div>';
-    dogGrid.appendChild(card);
-  });
+  function renderDogs(dogs) {
+    var grid = document.getElementById('dogGrid')
+    grid.innerHTML = ''
+    dogs.forEach(function(d, i) {
+      var card = document.createElement('div')
+      card.className = 'dog-card reveal reveal-d' + (i + 1)
+      var photoHtml = hasImg(d.photo)
+        ? '<div class="dog-photo has-photo"><img src="' + d.photo + '" alt="' + d.name + '"></div>'
+        : '<div class="dog-photo"><span class="placeholder">种犬照片<br>Stud Photo</span></div>'
+      var statsHtml = [
+        { val: d.height || '--', label: '肩高' },
+        { val: d.weight || '--', label: '体重' },
+        { val: d.genetics || '--', label: '遗传' }
+      ].map(function(s) {
+        return '<div class="dog-stat"><span class="val">' + s.val + '</span><span class="lbl">' + s.label + '</span></div>'
+      }).join('')
+      card.innerHTML = photoHtml +
+        '<div class="dog-info">' +
+          '<h3 class="dog-name"><span class="en">' + (d.name_en || '') + '</span>' + d.name + '</h3>' +
+          '<span class="dog-title">' + (d.title || '') + '</span>' +
+          '<p class="dog-desc">' + (d.description || '') + '</p>' +
+          '<div class="dog-stats">' + statsHtml + '</div>' +
+        '</div>'
+      grid.appendChild(card)
+    })
+  }
 
   // ── 渲染照片墙 ──
-  var galleryGrid = document.getElementById('galleryGrid');
-  D.gallery.forEach(function(g, i) {
-    var item = document.createElement('div');
-    item.className = 'gallery-item' + (g.layout ? ' ' + g.layout : '');
-
-    if (hasImg(g.photo)) {
-      item.className += ' has-photo';
-      item.innerHTML = '<img src="' + g.photo + '" alt="' + g.label + '">';
-    } else {
-      // 轮换不同色调的占位渐变
-      item.className += ' g-placeholder-' + ((i % 6) + 1);
-      item.innerHTML = '<span class="placeholder-label">' + g.label + '</span>';
-    }
-    galleryGrid.appendChild(item);
-  });
+  function renderGallery(items) {
+    var grid = document.getElementById('galleryGrid')
+    grid.innerHTML = ''
+    items.forEach(function(g, i) {
+      var item = document.createElement('div')
+      item.className = 'gallery-item' + (g.layout ? ' ' + g.layout : '')
+      if (hasImg(g.photo)) {
+        item.className += ' has-photo'
+        item.innerHTML = '<img src="' + g.photo + '" alt="' + (g.label || '') + '">'
+      } else {
+        item.className += ' g-placeholder-' + ((i % 6) + 1)
+        item.innerHTML = '<span class="placeholder-label">' + (g.label || '') + '</span>'
+      }
+      grid.appendChild(item)
+    })
+  }
 
   // ── 渲染联系信息 ──
-  var contactGrid = document.getElementById('contactGrid');
+  function renderContact(c) {
+    var grid = document.getElementById('contactGrid')
+    grid.innerHTML = ''
+    var items = [
+      { icon: '📍', label: '犬舍地址', value: c.address || '' },
+      { icon: '📞', label: '联系电话', value: c.phone || '' },
+      { icon: '✉️', label: '电子邮箱', value: c.email || '' },
+      { icon: '💬', label: '微信咨询', value: c.wechat || '' }
+    ]
+    var infoDiv = document.createElement('div')
+    infoDiv.className = 'contact-info reveal reveal-d1'
+    infoDiv.innerHTML = '<h4>欢迎预约来访</h4>' + items.map(function(c) {
+      return '<div class="contact-item">' +
+        '<span class="contact-icon">' + c.icon + '</span>' +
+        '<div><span class="clabel">' + c.label + '</span><span class="cvalue">' + c.value + '</span></div>' +
+      '</div>'
+    }).join('')
+    grid.appendChild(infoDiv)
 
-  // 左侧信息
-  var infoDiv = document.createElement('div');
-  infoDiv.className = 'contact-info reveal reveal-d1';
-  var itemsHtml = D.contact.items.map(function(c) {
-    return '<div class="contact-item">' +
-      '<span class="contact-icon">' + c.icon + '</span>' +
-      '<div><span class="clabel">' + c.label + '</span><span class="cvalue">' + c.value + '</span></div>' +
-    '</div>';
-  }).join('');
-  infoDiv.innerHTML = '<h4>' + D.contact.title + '</h4>' + itemsHtml;
-  contactGrid.appendChild(infoDiv);
-
-  // 右侧二维码
-  var qrDiv = document.createElement('div');
-  qrDiv.className = 'reveal reveal-d2';
-  if (hasImg(D.contact.qrPhoto)) {
-    qrDiv.innerHTML =
-      '<div class="qr-placeholder has-qr"><img src="' + D.contact.qrPhoto + '" alt="微信二维码"></div>' +
-      '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">' + D.contact.qrHint + '</p>';
-  } else {
-    qrDiv.innerHTML =
-      '<div class="qr-placeholder"><span class="qr-icon">⬜</span><span class="qr-text">微信二维码<br>WeChat QR</span></div>' +
-      '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">' + D.contact.qrHint + '</p>';
+    var qrDiv = document.createElement('div')
+    qrDiv.className = 'reveal reveal-d2'
+    if (hasImg(c.qr_photo)) {
+      qrDiv.innerHTML =
+        '<div class="qr-placeholder has-qr"><img src="' + c.qr_photo + '" alt="微信二维码"></div>' +
+        '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">扫码添加微信，了解更多犬只信息</p>'
+    } else {
+      qrDiv.innerHTML =
+        '<div class="qr-placeholder"><span class="qr-icon">⬜</span><span class="qr-text">微信二维码<br>WeChat QR</span></div>' +
+        '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">扫码添加微信，了解更多犬只信息</p>'
+    }
+    grid.appendChild(qrDiv)
   }
-  contactGrid.appendChild(qrDiv);
 
+  // ── 主流程：从 Supabase 读取，失败则用本地数据 ──
+  async function loadData() {
+    // 先渲染静态内容
+    renderTraits()
+
+    try {
+      // 并行读取 Supabase
+      var results = await Promise.allSettled([
+        sb.from('dogs').select('*').order('sort_order'),
+        sb.from('gallery').select('*').order('sort_order'),
+        sb.from('contacts').select('*').limit(1).single(),
+        sb.from('site_config').select('*').limit(1).single()
+      ])
+
+      // 种犬
+      if (results[0].status === 'fulfilled' && results[0].value.data) {
+        renderDogs(results[0].value.data)
+      } else {
+        renderDogs(SITE_DATA.dogs)
+      }
+
+      // 照片墙
+      if (results[1].status === 'fulfilled' && results[1].value.data) {
+        renderGallery(results[1].value.data)
+      } else {
+        renderGallery(SITE_DATA.gallery)
+      }
+
+      // 联系方式
+      if (results[2].status === 'fulfilled' && results[2].value.data) {
+        renderContact(results[2].value.data)
+      } else {
+        var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
+        renderContact(c)
+      }
+
+      // Hero 照片
+      if (results[3].status === 'fulfilled' && results[3].value.data) {
+        renderHeroPhoto(results[3].value.data.hero_photo)
+      } else {
+        renderHeroPhoto(SITE_DATA.heroPhoto)
+      }
+
+    } catch(e) {
+      // 数据库完全连不上，全部用本地数据
+      renderDogs(SITE_DATA.dogs)
+      renderGallery(SITE_DATA.gallery)
+      var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
+      renderContact(c)
+      renderHeroPhoto(SITE_DATA.heroPhoto)
+    }
+  }
+
+  loadData()
 })();
 
 
