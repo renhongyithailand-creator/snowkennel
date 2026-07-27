@@ -217,7 +217,7 @@ async function openDogForm(id) {
     <label>英文名</label><input id="f_name_en" value="${esc(dog.name_en)}">
     <label>头衔</label><input id="f_title" value="${esc(dog.title)}">
     <label>描述</label><textarea id="f_desc">${esc(dog.description)}</textarea>
-    <label>照片路径</label><input id="f_photo" value="${esc(dog.photo)}" placeholder="如 images/dog1.jpg">
+    <label>照片路径</label><input id="f_photo" value="${esc(dog.photo)}" placeholder="上传后自动填入，也可手动填URL">${uploadBtnHtml('f_photo_file','f_photo')}
     <label>肩高</label><input id="f_height" value="${esc(dog.height)}">
     <label>体重</label><input id="f_weight" value="${esc(dog.weight)}">
     <label>遗传</label><input id="f_genetics" value="${esc(dog.genetics)}">
@@ -271,7 +271,7 @@ async function loadContact() {
     <label>联系电话</label><input id="c_phone" value="${esc(c.phone)}">
     <label>邮箱</label><input id="c_email" value="${esc(c.email)}">
     <label>微信</label><input id="c_wechat" value="${esc(c.wechat)}">
-    <label>二维码图片路径</label><input id="c_qr" value="${esc(c.qr_photo)}" placeholder="如 images/qr.jpg">
+    <label>二维码图片路径</label><input id="c_qr" value="${esc(c.qr_photo)}" placeholder="上传后自动填入">${uploadBtnHtml('c_qr_file','c_qr')}
     <button class="add-btn" onclick="saveContact(${c.id})" style="margin-top:14px">保存联系方式</button>
   `
 }
@@ -321,7 +321,7 @@ async function openGalleryForm(id) {
   const html = `
     <h3>${id ? '编辑照片' : '添加照片'}</h3>
     <label>标题</label><input id="g_label" value="${esc(g.label)}">
-    <label>照片路径</label><input id="g_photo" value="${esc(g.photo)}">
+    <label>照片路径</label><input id="g_photo" value="${esc(g.photo)}" placeholder="上传后自动填入">${uploadBtnHtml('g_photo_file','g_photo')}
     <label>布局</label><select id="g_layout"><option value="" ${g.layout===''?'selected':''}>普通</option><option value="tall" ${g.layout==='tall'?'selected':''}>高</option><option value="wide" ${g.layout==='wide'?'selected':''}>宽</option></select>
     <div class="btns">
       <button class="cancel-btn" onclick="closeModal()">取消</button>
@@ -418,7 +418,7 @@ async function loadConfig() {
     <h3 style="margin-bottom:16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">🖼️ Hero 区域</h3>
     <label>标签文字</label><input id="cf_hero_tag" value="${f('hero_tag','Giant Schnauzer · 专业繁育')}">
     <label>描述文字（&lt;br&gt;换行）</label><textarea id="cf_hero_desc" style="height:60px">${f('hero_desc','致力于繁育<strong>体型优美、性格稳定</strong>的巨型雪纳瑞<br>每一只幼犬，都是我们用心呵护的家人')}</textarea>
-    <label>背景圆形照片</label><input id="cf_hero_photo" value="${f('hero_photo','logo.jpg')}">
+    <label>背景圆形照片</label><input id="cf_hero_photo" value="${f('hero_photo','logo.jpg')}" placeholder="上传后自动填入">${uploadBtnHtml('cf_hero_file','cf_hero_photo')}
 
     <h3 style="margin:24px 0 16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">📖 关于我们</h3>
     <label>英文标签</label><input id="cf_about_label_en" value="${f('about_label_en','About Us')}">
@@ -427,7 +427,7 @@ async function loadConfig() {
     <label>标题(h3)</label><input id="cf_about_heading" value="${f('about_heading','以爱之名，繁育品质')}">
     <label>正文（段落用空行分隔）</label><textarea id="cf_about_text" style="height:120px">${f('about_text','思糯犬舍坐落于环境优美的郊外，拥有宽敞的活动空间和专业的犬舍设施。我们专注巨型雪纳瑞单一犬种的繁育与养护，坚持科学喂养、健康优先的理念。\n\n每一只种犬均经过严格的健康筛查和性格评估，确保后代不仅拥有标准优美的体型结构，更具备稳定亲人的性格特质。\n\n多年来，我们坚持以最高的动物福利标准对待每一只犬只。')}</textarea>
     <label>底部英文</label><input id="cf_about_footer" value="${f('about_footer','Breeding with love, raising with care')}">
-    <label>照片路径</label><input id="cf_about_photo" value="${f('about_photo','')}">
+    <label>照片路径</label><input id="cf_about_photo" value="${f('about_photo','')}" placeholder="上传后自动填入">${uploadBtnHtml('cf_about_file','cf_about_photo')}
 
     <h3 style="margin:24px 0 16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">🏷️ 区块标题</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -480,6 +480,33 @@ async function saveConfig(id) {
 }
 
 // ═══════════════════════════════════════════
+// 照片上传
+// ═══════════════════════════════════════════
+async function uploadPhoto(inputId, targetInputId) {
+  var fileInput = document.getElementById(inputId)
+  var file = fileInput.files[0]
+  if (!file) { showMsg('请先选择文件', 'err'); return }
+
+  var btn = document.getElementById(inputId + '_btn')
+  if (btn) { btn.textContent = '上传中...'; btn.disabled = true }
+
+  var fileName = Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '')
+  var { data, error } = await sb.storage.from('photos').upload(fileName, file)
+
+  if (btn) { btn.textContent = '📎 上传'; btn.disabled = false }
+
+  if (error) { showMsg('上传失败: ' + error.message, 'err'); return }
+
+  var url = sbUrl + '/storage/v1/object/public/photos/' + fileName
+  document.getElementById(targetInputId).value = url
+  showMsg('上传成功，已填入路径', 'ok')
+}
+
+function uploadBtnHtml(inputId, targetInputId) {
+  return '<input type="file" id="' + inputId + '" style="display:none" onchange="uploadPhoto(\'' + inputId + '\',\'' + targetInputId + '\')">' +
+    '<button type="button" id="' + inputId + '_btn" onclick="document.getElementById(\'' + inputId + '\').click()" style="padding:8px 14px;font-size:0.8rem;background:#f0ebe3;border:1px solid #e0d8cc;border-radius:4px;cursor:pointer;margin-top:4px">📎 从本地上传</button>'
+}
+
 // 工具函数
 // ═══════════════════════════════════════════
 function closeModal() { document.getElementById('modal').classList.remove('show') }
