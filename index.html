@@ -380,10 +380,7 @@ body::before {
  */
 var SITE_DATA = {
 
-  // ── Hero 背景圆形照片（留空显示渐变圆，填路径显示真实照片）──
   heroPhoto: 'logo.jpg',
-
-  // ── 犬种特性卡片 ──
   traits: [
     {
       icon: '🛡️',
@@ -402,21 +399,28 @@ var SITE_DATA = {
       title: '活力充沛',
       en: 'Energetic & Robust',
       desc: '体格强壮、耐力出众，适合活跃的家庭。每日充足运动能让它们保持愉悦和健康的体态。'
-    }
+    
   ],
-
-  // ── 种犬列表（数组，想加几只加几只） ──
   dogs: [
     {
       name: '种公 · 名称待定',
       en: 'Champion Line',
       title: '中国永久冠军登录 · CH.CN',
       desc: '体格雄伟，头版标准，被毛刚硬浓密。性格沉稳自信，遗传稳定，后代品质优异。',
-      photo: '',  // ← 填照片路径，如 'images/dog1.jpg'，留空显示占位
+      photo: '',
       stats: [
-        { val: '68cm',  label: '肩高' },
-        { val: '47kg',  label: '体重' },
-        { val: 'A/A',   label: '遗传' }
+        {
+          val: '68cm',
+          label: '肩高'
+        },
+        {
+          val: '47kg',
+          label: '体重'
+        },
+        {
+          val: 'A/A',
+          label: '遗传'
+        }
       ]
     },
     {
@@ -424,39 +428,84 @@ var SITE_DATA = {
       en: 'European Bloodline',
       title: '欧洲冠军血系 · INT.CH',
       desc: '结构匀称，动态流畅，母性极佳。性格温柔亲人，繁育的后代性格稳定、适应力强。',
-      photo: '',  // ← 填照片路径
+      photo: '',
       stats: [
-        { val: '62cm',  label: '肩高' },
-        { val: '38kg',  label: '体重' },
-        { val: 'A/B',   label: '遗传' }
+        {
+          val: '62cm',
+          label: '肩高'
+        },
+        {
+          val: '38kg',
+          label: '体重'
+        },
+        {
+          val: 'A/B',
+          label: '遗传'
+        }
       ]
     }
   ],
-
-  // ── 照片墙（数组，想加几张加几张） ──
   gallery: [
-    { label: '犬舍环境', layout: 'tall', photo: '' },
-    { label: '幼犬日常', layout: '',     photo: '' },
-    { label: '户外活动', layout: 'wide', photo: '' },
-    { label: '训练时光', layout: '',     photo: '' },
-    { label: '赛场风采', layout: 'wide', photo: '' },
-    { label: '温馨时刻', layout: 'tall', photo: '' }
+    {
+      label: '犬舍环境',
+      layout: 'tall',
+      photo: ''
+    },
+    {
+      label: '幼犬日常',
+      layout: '',
+      photo: ''
+    },
+    {
+      label: '户外活动',
+      layout: 'wide',
+      photo: ''
+    },
+    {
+      label: '训练时光',
+      layout: '',
+      photo: ''
+    },
+    {
+      label: '赛场风采',
+      layout: 'wide',
+      photo: ''
+    },
+    {
+      label: '温馨时刻',
+      layout: 'tall',
+      photo: ''
+    }
   ],
-
-  // ── 联系信息 ──
   contact: {
     title: '欢迎预约来访',
     items: [
-      { icon: '📍', label: '犬舍地址',  value: '（请填写您的犬舍地址）' },
-      { icon: '📞', label: '联系电话',  value: '（请填写您的联系电话）' },
-      { icon: '✉️', label: '电子邮箱',  value: 'info@snowkennel.com' },
-      { icon: '💬', label: '微信咨询',  value: '（请填写您的微信号）' }
+      {
+        icon: '📍',
+        label: '犬舍地址',
+        value: '（请填写您的犬舍地址）'
+      },
+      {
+        icon: '📞',
+        label: '联系电话',
+        value: '（请填写您的联系电话）'
+      },
+      {
+        icon: '✉️',
+        label: '电子邮箱',
+        value: 'info@snowkennel.com'
+      },
+      {
+        icon: '💬',
+        label: '微信咨询',
+        value: '（请填写您的微信号）'
+      }
     ],
-    qrPhoto: '',  // ← 填微信二维码图片路径
-    qrHint: '<span id="qrHint">扫码添加微信，了解更多犬只信息</span>'
+    qrPhoto: '',
+    qrHint: '扫码添加微信，了解更多犬只信息'
   }
-
-};
+}
+;
 // ═══════════════ 数据配置结束 ═══════════════
 
 

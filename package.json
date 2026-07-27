@@ -1,0 +1,9 @@
+{
+  "name": "snowkennel",
+  "scripts": {
+    "sync": "node build.js && git add -A && git commit -m '更新内容' && git push"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2"
+  }
+}
