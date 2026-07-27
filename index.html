@@ -639,42 +639,8 @@ var SITE_DATA = {
     renderHeroPhoto(SITE_DATA.heroPhoto)
   }
 
-  // 立即渲染本地数据，保证页面不空白
+  // 渲染本地数据（永远执行，永不失败）
   renderAllFromLocal()
-
-  // 后台加载 Supabase SDK，不阻塞渲染
-  var script = document.createElement('script')
-  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
-  script.onload = function() {
-    try {
-      var sbUrl = 'https://myzvmmrexkzhasotpjjo.supabase.co'
-      var sbKey = 'sb_publishable_nLb9ULPNjSd-nor6JDlTKA_AGAlSFWY'
-      var sb = window.supabase.createClient(sbUrl, sbKey)
-
-      Promise.allSettled([
-        sb.from('dogs').select('*').order('sort_order'),
-        sb.from('gallery').select('*').order('sort_order'),
-        sb.from('contacts').select('*').limit(1).single(),
-        sb.from('site_config').select('*').limit(1).single(),
-        sb.from('breed_traits').select('*').order('sort_order')
-      ]).then(function(results) {
-        var ok = function(r) { return r.status === 'fulfilled' && r.value && !r.value.error }
-        var d = function(r) { return r.value ? r.value.data : null }
-        var arr = function(r) { var x = d(r); return Array.isArray(x) && x.length > 0 ? x : null }
-
-        var dogs = arr(results[0]), gallery = arr(results[1]), traits = arr(results[4])
-        var contact = ok(results[2]) && d(results[2]) && d(results[2]).address !== undefined ? d(results[2]) : null
-        var config = ok(results[3]) && d(results[3]) ? d(results[3]) : null
-
-        if (dogs) renderDogs(dogs)
-        if (gallery) renderGallery(gallery)
-        if (traits) renderTraits(traits)
-        if (contact) renderContact(contact)
-        if (config) { applySiteConfig(config); renderHeroPhoto(config.hero_photo) }
-      }).catch(function() {})
-    } catch(e) {}
-  }
-  document.head.appendChild(script)
 })();
 
 

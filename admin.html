@@ -86,7 +86,10 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f2ed;c
 <div id="adminPage" style="display:none">
   <div class="topbar">
     <h2>🐕 思糯犬舍 · 后台管理</h2>
-    <button class="logout" onclick="doLogout()">退出登录</button>
+    <div>
+      <button onclick="publishSite()" style="background:#b8944c;color:#fff;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.8rem;margin-right:10px">🚀 发布到网站</button>
+      <button class="logout" onclick="doLogout()">退出</button>
+    </div>
   </div>
 
   <div class="tabs">
@@ -480,6 +483,79 @@ async function saveConfig(id) {
 }
 
 // ═══════════════════════════════════════════
+// 导出数据并替换主页 SITE_DATA
+// ═══════════════════════════════════════════
+async function publishSite() {
+  if (!confirm('将把后台所有数据导出到 SITE_DATA 文件，\n替换 /Users/xuan/snowkennel/site-data.js 后 git push 即可更新网站。\n\n确定导出？')) return
+
+  var dogs = (await sb.from('dogs').select('*').order('sort_order')).data || []
+  var gallery = (await sb.from('gallery').select('*').order('sort_order')).data || []
+  var contact = (await sb.from('contacts').select('*').limit(1).single()).data || {}
+  var config = (await sb.from('site_config').select('*').limit(1).single()).data || {}
+  var traits = (await sb.from('breed_traits').select('*').order('sort_order')).data || []
+
+  var dataJs = '// 思糯犬舍 — 数据配置（由后台导出）\n'
+  dataJs += '// 修改时间: ' + new Date().toLocaleString('zh-CN') + '\n\n'
+  dataJs += 'var SITE_DATA = {\n\n'
+  dataJs += '  heroPhoto: ' + JSON.stringify(config.hero_photo || 'logo.jpg') + ',\n\n'
+
+  // traits
+  dataJs += '  traits: [\n'
+  traits.forEach(function(t, i) {
+    dataJs += '    { icon: ' + JSON.stringify(t.icon) + ', title: ' + JSON.stringify(t.title) + ', en: ' + JSON.stringify(t.en_label) + ', desc: ' + JSON.stringify(t.description) + ' }'
+    dataJs += (i < traits.length - 1 ? ',' : '') + '\n'
+  })
+  dataJs += '  ],\n\n'
+
+  // dogs
+  dataJs += '  dogs: [\n'
+  dogs.forEach(function(d, i) {
+    dataJs += '    {\n'
+    dataJs += '      name: ' + JSON.stringify(d.name) + ',\n'
+    dataJs += '      en: ' + JSON.stringify(d.name_en) + ',\n'
+    dataJs += '      title: ' + JSON.stringify(d.title) + ',\n'
+    dataJs += '      desc: ' + JSON.stringify(d.description) + ',\n'
+    dataJs += '      photo: ' + JSON.stringify(d.photo) + ',\n'
+    dataJs += '      stats: [\n'
+    dataJs += '        { val: ' + JSON.stringify(d.height) + ', label: "肩高" },\n'
+    dataJs += '        { val: ' + JSON.stringify(d.weight) + ', label: "体重" },\n'
+    dataJs += '        { val: ' + JSON.stringify(d.genetics) + ', label: "遗传" }\n'
+    dataJs += '      ]\n'
+    dataJs += '    }' + (i < dogs.length - 1 ? ',' : '') + '\n'
+  })
+  dataJs += '  ],\n\n'
+
+  // gallery
+  dataJs += '  gallery: [\n'
+  gallery.forEach(function(g, i) {
+    dataJs += '    { label: ' + JSON.stringify(g.label) + ', layout: ' + JSON.stringify(g.layout) + ', photo: ' + JSON.stringify(g.photo) + ' }'
+    dataJs += (i < gallery.length - 1 ? ',' : '') + '\n'
+  })
+  dataJs += '  ],\n\n'
+
+  // contact
+  dataJs += '  contact: {\n'
+  dataJs += '    title: ' + JSON.stringify(config.contact_heading || '欢迎预约来访') + ',\n'
+  dataJs += '    items: [\n'
+  dataJs += '      { icon: "📍", label: "犬舍地址", value: ' + JSON.stringify(contact.address || '') + ' },\n'
+  dataJs += '      { icon: "📞", label: "联系电话", value: ' + JSON.stringify(contact.phone || '') + ' },\n'
+  dataJs += '      { icon: "✉️", label: "电子邮箱", value: ' + JSON.stringify(contact.email || '') + ' },\n'
+  dataJs += '      { icon: "💬", label: "微信咨询", value: ' + JSON.stringify(contact.wechat || '') + ' }\n'
+  dataJs += '    ],\n'
+  dataJs += '    qrPhoto: ' + JSON.stringify(contact.qr_photo || '') + ',\n'
+  dataJs += '    qrHint: ' + JSON.stringify(config.contact_qr_hint || '扫码添加微信') + '\n'
+  dataJs += '  }\n\n'
+  dataJs += '};\n'
+
+  // 下载文件
+  var blob = new Blob([dataJs], { type: 'text/javascript' })
+  var a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'site-data.js'
+  a.click()
+  showMsg('已下载 site-data.js，放到 snowkennel 文件夹替换旧文件后 git push 即可', 'ok')
+}
+
 // 照片上传
 // ═══════════════════════════════════════════
 async function uploadPhoto(inputId, targetInputId) {
