@@ -657,39 +657,8 @@ var SITE_DATA = {
     renderHeroPhoto(SITE_DATA.heroPhoto)
   }
 
-  // 立即渲染本地数据，保证不空白
+  // 渲染本地数据
   renderAllFromLocal()
-
-  // 用 REST API 从 Supabase 拉取最新数据（无需 SDK）
-  var API = 'https://myzvmmrexkzhasotpjjo.supabase.co/rest/v1'
-  var KEY = 'sb_publishable_nLb9ULPNjSd-nor6JDlTKA_AGAlSFWY'
-  var H = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
-
-  function fetchJSON(url) {
-    return fetch(url, { headers: H }).then(function(r) { return r.ok ? r.json() : null }).catch(function() { return null })
-  }
-
-  Promise.allSettled([
-    fetchJSON(API + '/dogs?select=*&order=sort_order'),
-    fetchJSON(API + '/gallery?select=*&order=sort_order'),
-    fetchJSON(API + '/contacts?select=*&limit=1'),
-    fetchJSON(API + '/site_config?select=*&limit=1'),
-    fetchJSON(API + '/breed_traits?select=*&order=sort_order')
-  ]).then(function(r) {
-    var raw = function(i) { return r[i].status === 'fulfilled' ? r[i].value : null }
-    var arr = function(i) { var x = raw(i); return Array.isArray(x) && x.length > 0 ? x : null }
-
-    var dogs = arr(0), gallery = arr(1), traits = arr(4)
-    var contactList = arr(2), configList = arr(3)
-    var contact = (contactList && contactList.length > 0) ? contactList[0] : null
-    var config = (configList && configList.length > 0) ? configList[0] : null
-
-    try { if (dogs) renderDogs(dogs) } catch(e) {}
-    try { if (gallery) renderGallery(gallery) } catch(e) {}
-    try { if (traits) renderTraits(traits) } catch(e) {}
-    try { if (contact && contact.address !== undefined) renderContact(contact) } catch(e) {}
-    try { if (config && (config.hero_tag || config.about_heading)) { applySiteConfig(config); renderHeroPhoto(config.hero_photo) } } catch(e) {}
-  }).catch(function(){})
 })();
 
 
