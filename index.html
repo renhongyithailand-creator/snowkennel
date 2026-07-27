@@ -634,36 +634,34 @@ var SITE_DATA = {
       ])
 
       // 种犬
-      if (results[0].status === 'fulfilled' && results[0].value.data) {
+      if (results[0].status === 'fulfilled' && Array.isArray(results[0].value.data) && results[0].value.data.length > 0) {
         renderDogs(results[0].value.data)
       } else { renderDogs(SITE_DATA.dogs) }
 
       // 照片墙
-      if (results[1].status === 'fulfilled' && results[1].value.data) {
+      if (results[1].status === 'fulfilled' && Array.isArray(results[1].value.data) && results[1].value.data.length > 0) {
         renderGallery(results[1].value.data)
       } else { renderGallery(SITE_DATA.gallery) }
 
       // 联系方式
-      if (results[2].status === 'fulfilled' && results[2].value.data) {
-        var cd = results[2].value.data
-        renderContact(cd)
+      if (results[2].status === 'fulfilled' && results[2].value.data && results[2].value.data.address !== undefined) {
+        renderContact(results[2].value.data)
       } else {
         var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
         renderContact(c)
       }
 
       // 网站设置 & Hero
-      if (results[3].status === 'fulfilled' && results[3].value.data) {
-        var cfg = results[3].value.data
-        applySiteConfig(cfg)
-        renderHeroPhoto(cfg.hero_photo)
+      if (results[3].status === 'fulfilled' && results[3].value.data && (results[3].value.data.hero_tag || results[3].value.data.about_heading)) {
+        applySiteConfig(results[3].value.data)
+        renderHeroPhoto(results[3].value.data.hero_photo)
       } else {
         applySiteConfig(null)
         renderHeroPhoto(SITE_DATA.heroPhoto)
       }
 
       // 犬种特性
-      if (results[4].status === 'fulfilled' && results[4].value.data && results[4].value.data.length > 0) {
+      if (results[4].status === 'fulfilled' && Array.isArray(results[4].value.data) && results[4].value.data.length > 0) {
         renderTraits(results[4].value.data)
       } else {
         renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
