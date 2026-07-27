@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>思糯犬舍 · 后台管理</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f2ed;color:#2b2722;min-height:100vh}
+.container{max-width:900px;margin:0 auto;padding:20px}
+
+/* 登录 */
+.login-box{max-width:380px;margin:80px auto;background:#fff;padding:40px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.06)}
+.login-box h1{text-align:center;font-size:1.3rem;margin-bottom:8px;color:#1e1b18}
+.login-box .sub{text-align:center;font-size:0.8rem;color:#8c8278;margin-bottom:28px}
+.login-box label{display:block;font-size:0.8rem;color:#5c5348;margin-bottom:4px}
+.login-box input{width:100%;padding:10px 12px;border:1px solid #e0d8cc;border-radius:4px;font-size:0.9rem;margin-bottom:16px;font-family:inherit}
+.login-box input:focus{outline:none;border-color:#b8944c}
+.login-box button{width:100%;padding:10px;background:#1e1b18;color:#faf7f2;border:none;border-radius:4px;cursor:pointer;font-size:0.9rem;font-family:inherit}
+.login-box button:hover{background:#3a3530}
+.login-box .err{color:#c0392b;font-size:0.8rem;text-align:center;margin-top:12px;display:none}
+
+/* 顶部栏 */
+.topbar{background:#1e1b18;color:#faf7f2;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.topbar h2{font-size:1rem;font-weight:normal}
+.topbar .logout{background:none;border:1px solid #5c5348;color:#8c8278;padding:6px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.8rem}
+.topbar .logout:hover{border-color:#b8944c;color:#b8944c}
+
+/* 标签页 */
+.tabs{display:flex;gap:0;background:#fff;border-bottom:1px solid #e0d8cc}
+.tab-btn{padding:12px 20px;border:none;background:none;cursor:pointer;font-family:inherit;font-size:0.85rem;color:#8c8278;border-bottom:2px solid transparent}
+.tab-btn.active{color:#1e1b18;border-bottom-color:#b8944c}
+.tab-btn:hover{color:#1e1b18}
+.tab-content{display:none;padding:20px;background:#fff}
+.tab-content.active{display:block}
+
+/* 列表 */
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f0ebe3}
+.list-item:last-child{border-bottom:none}
+.list-item .info{flex:1}
+.list-item .info .name{font-size:0.9rem;color:#1e1b18;font-weight:bold}
+.list-item .info .detail{font-size:0.75rem;color:#8c8278;margin-top:2px}
+.list-item .actions{display:flex;gap:8px}
+.list-item .actions button{padding:5px 12px;border:1px solid #e0d8cc;background:#fff;border-radius:3px;cursor:pointer;font-family:inherit;font-size:0.75rem}
+.list-item .actions .edit-btn:hover{border-color:#b8944c;color:#b8944c}
+.list-item .actions .del-btn:hover{border-color:#c0392b;color:#c0392b}
+
+/* 表单弹窗 */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:100;display:none}
+.modal.show{display:flex}
+.modal-box{background:#fff;padding:28px;border-radius:8px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+.modal-box h3{font-size:1.1rem;margin-bottom:16px;color:#1e1b18}
+.modal-box label{display:block;font-size:0.75rem;color:#5c5348;margin-bottom:2px;margin-top:10px}
+.modal-box input,.modal-box textarea,.modal-box select{width:100%;padding:8px 10px;border:1px solid #e0d8cc;border-radius:3px;font-size:0.85rem;font-family:inherit}
+.modal-box textarea{height:80px;resize:vertical}
+.modal-box input:focus,.modal-box textarea:focus{outline:none;border-color:#b8944c}
+.modal-box .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+.modal-box .btns button{padding:8px 20px;border-radius:3px;cursor:pointer;font-family:inherit;font-size:0.85rem}
+.modal-box .btns .save-btn{background:#1e1b18;color:#fff;border:none}
+.modal-box .btns .cancel-btn{background:#fff;border:1px solid #e0d8cc;color:#5c5348}
+
+.add-btn{padding:8px 16px;background:#b8944c;color:#fff;border:none;border-radius:4px;cursor:pointer;font-family:inherit;font-size:0.85rem;margin-bottom:16px}
+.add-btn:hover{background:#a07e3a}
+.empty{text-align:center;color:#8c8278;padding:40px;font-size:0.9rem}
+
+.msg{position:fixed;top:20px;right:20px;padding:10px 20px;border-radius:4px;z-index:200;font-size:0.85rem;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.msg.ok{background:#d4edda;color:#155724}
+.msg.err{background:#f8d7da;color:#721c24}
+</style>
+</head>
+<body>
+
+<!-- 登录界面 -->
+<div id="loginPage" class="login-box">
+  <h1>思糯犬舍 · 后台管理</h1>
+  <p class="sub">SNOW KENNEL Admin</p>
+  <label>邮箱</label><input type="email" id="loginEmail" placeholder="你的邮箱">
+  <label>密码</label><input type="password" id="loginPass" placeholder="密码">
+  <button onclick="doLogin()">登录</button>
+  <p class="err" id="loginErr">邮箱或密码错误</p>
+</div>
+
+<!-- 管理界面 -->
+<div id="adminPage" style="display:none">
+  <div class="topbar">
+    <h2>🐕 思糯犬舍 · 后台管理</h2>
+    <button class="logout" onclick="doLogout()">退出登录</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-dogs">种犬管理</button>
+    <button class="tab-btn" data-tab="tab-contact">联系方式</button>
+    <button class="tab-btn" data-tab="tab-gallery">照片墙</button>
+    <button class="tab-btn" data-tab="tab-config">网站设置</button>
+  </div>
+
+  <!-- 种犬管理 -->
+  <div class="tab-content active" id="tab-dogs">
+    <button class="add-btn" onclick="openDogForm()">+ 添加种犬</button>
+    <div id="dogList"></div>
+  </div>
+
+  <!-- 联系方式 -->
+  <div class="tab-content" id="tab-contact">
+    <div id="contactForm"></div>
+  </div>
+
+  <!-- 照片墙 -->
+  <div class="tab-content" id="tab-gallery">
+    <button class="add-btn" onclick="openGalleryForm()">+ 添加照片</button>
+    <div id="galleryList"></div>
+  </div>
+
+  <!-- 网站设置 -->
+  <div class="tab-content" id="tab-config">
+    <div id="configForm"></div>
+  </div>
+</div>
+
+<!-- 编辑弹窗 -->
+<div class="modal" id="modal">
+  <div class="modal-box" id="modalContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// Supabase 配置
+// ═══════════════════════════════════════════
+const SB_URL = 'https://myzvmmrexkzhasotpjjo.supabase.co'
+const SB_KEY = 'sb_publishable_nLb9ULPNjSd-nor6JDlTKA_AGAlSFWY'
+const sb = supabase.createClient(SB_URL, SB_KEY)
+
+// ═══════════════════════════════════════════
+// 登录 / 退出
+// ═══════════════════════════════════════════
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim()
+  const pass = document.getElementById('loginPass').value
+  const err = document.getElementById('loginErr')
+
+  if (!email || !pass) { err.textContent = '请填写邮箱和密码'; err.style.display = 'block'; return }
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass })
+  if (error) { err.textContent = '邮箱或密码错误'; err.style.display = 'block'; return }
+
+  err.style.display = 'none'
+  document.getElementById('loginPage').style.display = 'none'
+  document.getElementById('adminPage').style.display = ''
+  loadAll()
+}
+
+async function doLogout() {
+  await sb.auth.signOut()
+  document.getElementById('loginPage').style.display = ''
+  document.getElementById('adminPage').style.display = 'none'
+}
+
+// 检查是否已登录
+sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    document.getElementById('loginPage').style.display = 'none'
+    document.getElementById('adminPage').style.display = ''
+    loadAll()
+  }
+})
+
+// ═══════════════════════════════════════════
+// 标签页切换
+// ═══════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'))
+    btn.classList.add('active')
+    document.getElementById(btn.dataset.tab).classList.add('active')
+  })
+})
+
+// ═══════════════════════════════════════════
+// 种犬管理
+// ═══════════════════════════════════════════
+async function loadDogs() {
+  const { data, error } = await sb.from('dogs').select('*').order('sort_order')
+  const list = document.getElementById('dogList')
+  if (!data || data.length === 0) { list.innerHTML = '<div class="empty">暂无种犬，点击上方按钮添加</div>'; return }
+  list.innerHTML = data.map(d => `
+    <div class="list-item">
+      <div class="info">
+        <div class="name">${d.name} <span style="color:#8c8278;font-weight:normal">${d.type}</span></div>
+        <div class="detail">${d.name_en} · ${d.title} · ${d.height}/${d.weight} · 遗传${d.genetics}</div>
+      </div>
+      <div class="actions">
+        <button class="edit-btn" onclick="openDogForm(${d.id})">编辑</button>
+        <button class="del-btn" onclick="deleteDog(${d.id},'${d.name}')">删除</button>
+      </div>
+    </div>
+  `).join('')
+}
+
+async function openDogForm(id) {
+  let dog = { name:'',name_en:'',title:'',description:'',type:'种公',photo:'',height:'',weight:'',genetics:'',sort_order:0,active:true }
+  if (id) {
+    const { data } = await sb.from('dogs').select('*').eq('id', id).single()
+    if (data) dog = data
+  }
+  const html = `
+    <h3>${id ? '编辑种犬' : '添加种犬'}</h3>
+    <label>类型</label><select id="f_type"><option ${dog.type==='种公'?'selected':''}>种公</option><option ${dog.type==='种母'?'selected':''}>种母</option></select>
+    <label>中文名</label><input id="f_name" value="${esc(dog.name)}">
+    <label>英文名</label><input id="f_name_en" value="${esc(dog.name_en)}">
+    <label>头衔</label><input id="f_title" value="${esc(dog.title)}">
+    <label>描述</label><textarea id="f_desc">${esc(dog.description)}</textarea>
+    <label>照片路径</label><input id="f_photo" value="${esc(dog.photo)}" placeholder="如 images/dog1.jpg">
+    <label>肩高</label><input id="f_height" value="${esc(dog.height)}">
+    <label>体重</label><input id="f_weight" value="${esc(dog.weight)}">
+    <label>遗传</label><input id="f_genetics" value="${esc(dog.genetics)}">
+    <div class="btns">
+      <button class="cancel-btn" onclick="closeModal()">取消</button>
+      <button class="save-btn" onclick="saveDog(${id||0})">保存</button>
+    </div>
+  `
+  document.getElementById('modalContent').innerHTML = html
+  document.getElementById('modal').classList.add('show')
+}
+
+async function saveDog(id) {
+  const row = {
+    type: document.getElementById('f_type').value,
+    name: document.getElementById('f_name').value,
+    name_en: document.getElementById('f_name_en').value,
+    title: document.getElementById('f_title').value,
+    description: document.getElementById('f_desc').value,
+    photo: document.getElementById('f_photo').value,
+    height: document.getElementById('f_height').value,
+    weight: document.getElementById('f_weight').value,
+    genetics: document.getElementById('f_genetics').value,
+  }
+  let error
+  if (id) { ({ error } = await sb.from('dogs').update(row).eq('id', id)) }
+  else { ({ error } = await sb.from('dogs').insert(row)) }
+
+  if (error) { showMsg('保存失败: '+error.message, 'err'); return }
+  closeModal()
+  loadDogs()
+  showMsg('保存成功', 'ok')
+}
+
+async function deleteDog(id, name) {
+  if (!confirm('确定删除「' + name + '」？')) return
+  const { error } = await sb.from('dogs').delete().eq('id', id)
+  if (error) { showMsg('删除失败', 'err'); return }
+  loadDogs()
+  showMsg('已删除', 'ok')
+}
+
+// ═══════════════════════════════════════════
+// 联系方式
+// ═══════════════════════════════════════════
+async function loadContact() {
+  const { data } = await sb.from('contacts').select('*').limit(1).single()
+  const c = data || { id:0, address:'', phone:'', email:'', wechat:'', qr_photo:'' }
+  document.getElementById('contactForm').innerHTML = `
+    <label>犬舍地址</label><input id="c_address" value="${esc(c.address)}">
+    <label>联系电话</label><input id="c_phone" value="${esc(c.phone)}">
+    <label>邮箱</label><input id="c_email" value="${esc(c.email)}">
+    <label>微信</label><input id="c_wechat" value="${esc(c.wechat)}">
+    <label>二维码图片路径</label><input id="c_qr" value="${esc(c.qr_photo)}" placeholder="如 images/qr.jpg">
+    <button class="add-btn" onclick="saveContact(${c.id})" style="margin-top:14px">保存联系方式</button>
+  `
+}
+
+async function saveContact(id) {
+  const row = {
+    address: document.getElementById('c_address').value,
+    phone: document.getElementById('c_phone').value,
+    email: document.getElementById('c_email').value,
+    wechat: document.getElementById('c_wechat').value,
+    qr_photo: document.getElementById('c_qr').value,
+  }
+  let error
+  if (id) { ({ error } = await sb.from('contacts').update(row).eq('id', id)) }
+  else { ({ error } = await sb.from('contacts').insert(row)) }
+  if (error) { showMsg('保存失败: '+error.message, 'err'); return }
+  showMsg('联系方式已更新', 'ok')
+}
+
+// ═══════════════════════════════════════════
+// 照片墙
+// ═══════════════════════════════════════════
+async function loadGallery() {
+  const { data } = await sb.from('gallery').select('*').order('sort_order')
+  const list = document.getElementById('galleryList')
+  if (!data || data.length === 0) { list.innerHTML = '<div class="empty">暂无照片</div>'; return }
+  list.innerHTML = data.map(g => `
+    <div class="list-item">
+      <div class="info">
+        <div class="name">${g.label} <span style="color:#8c8278;font-weight:normal">${g.layout||'普通'}</span></div>
+        <div class="detail">照片: ${g.photo||'未设置'}</div>
+      </div>
+      <div class="actions">
+        <button class="edit-btn" onclick="openGalleryForm(${g.id})">编辑</button>
+        <button class="del-btn" onclick="deleteGallery(${g.id},'${g.label}')">删除</button>
+      </div>
+    </div>
+  `).join('')
+}
+
+async function openGalleryForm(id) {
+  let g = { label:'', photo:'', layout:'', sort_order:0 }
+  if (id) {
+    const { data } = await sb.from('gallery').select('*').eq('id', id).single()
+    if (data) g = data
+  }
+  const html = `
+    <h3>${id ? '编辑照片' : '添加照片'}</h3>
+    <label>标题</label><input id="g_label" value="${esc(g.label)}">
+    <label>照片路径</label><input id="g_photo" value="${esc(g.photo)}">
+    <label>布局</label><select id="g_layout"><option value="" ${g.layout===''?'selected':''}>普通</option><option value="tall" ${g.layout==='tall'?'selected':''}>高</option><option value="wide" ${g.layout==='wide'?'selected':''}>宽</option></select>
+    <div class="btns">
+      <button class="cancel-btn" onclick="closeModal()">取消</button>
+      <button class="save-btn" onclick="saveGallery(${id||0})">保存</button>
+    </div>
+  `
+  document.getElementById('modalContent').innerHTML = html
+  document.getElementById('modal').classList.add('show')
+}
+
+async function saveGallery(id) {
+  const row = {
+    label: document.getElementById('g_label').value,
+    photo: document.getElementById('g_photo').value,
+    layout: document.getElementById('g_layout').value,
+  }
+  let error
+  if (id) { ({ error } = await sb.from('gallery').update(row).eq('id', id)) }
+  else { ({ error } = await sb.from('gallery').insert(row)) }
+  if (error) { showMsg('保存失败: '+error.message, 'err'); return }
+  closeModal()
+  loadGallery()
+  showMsg('保存成功', 'ok')
+}
+
+async function deleteGallery(id, label) {
+  if (!confirm('确定删除「' + label + '」？')) return
+  const { error } = await sb.from('gallery').delete().eq('id', id)
+  if (error) { showMsg('删除失败', 'err'); return }
+  loadGallery()
+  showMsg('已删除', 'ok')
+}
+
+// ═══════════════════════════════════════════
+// 网站设置
+// ═══════════════════════════════════════════
+async function loadConfig() {
+  const { data } = await sb.from('site_config').select('*').limit(1).single()
+  const c = data || { id:0, hero_photo:'', about_photo:'' }
+  document.getElementById('configForm').innerHTML = `
+    <label>Hero 背景圆形照片路径</label><input id="s_hero" value="${esc(c.hero_photo)}" placeholder="如 logo.jpg 或留空">
+    <label>关于我们照片路径</label><input id="s_about" value="${esc(c.about_photo)}" placeholder="如 images/kennel.jpg 或留空">
+    <button class="add-btn" onclick="saveConfig(${c.id})" style="margin-top:14px">保存设置</button>
+  `
+}
+
+async function saveConfig(id) {
+  const row = {
+    hero_photo: document.getElementById('s_hero').value,
+    about_photo: document.getElementById('s_about').value,
+  }
+  let error
+  if (id) { ({ error } = await sb.from('site_config').update(row).eq('id', id)) }
+  else { ({ error } = await sb.from('site_config').insert(row)) }
+  if (error) { showMsg('保存失败: '+error.message, 'err'); return }
+  showMsg('设置已更新', 'ok')
+}
+
+// ═══════════════════════════════════════════
+// 工具函数
+// ═══════════════════════════════════════════
+function closeModal() { document.getElementById('modal').classList.remove('show') }
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function showMsg(text, type) {
+  const m = document.createElement('div')
+  m.className = 'msg ' + (type||'ok'); m.textContent = text; document.body.appendChild(m)
+  setTimeout(() => m.remove(), 2500)
+}
+function loadAll() { loadDogs(); loadContact(); loadGallery(); loadConfig() }
+
+// 关闭弹窗（点击背景）
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal()
+})
+</script>
+</body>
+</html>
