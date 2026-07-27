@@ -684,11 +684,11 @@ var SITE_DATA = {
     var contact = (contactList && contactList.length > 0) ? contactList[0] : null
     var config = (configList && configList.length > 0) ? configList[0] : null
 
-    if (dogs) renderDogs(dogs)
-    if (gallery) renderGallery(gallery)
-    if (traits) renderTraits(traits)
-    if (contact && contact.address !== undefined) renderContact(contact)
-    if (config && (config.hero_tag || config.about_heading)) { applySiteConfig(config); renderHeroPhoto(config.hero_photo) }
+    try { if (dogs) renderDogs(dogs) } catch(e) {}
+    try { if (gallery) renderGallery(gallery) } catch(e) {}
+    try { if (traits) renderTraits(traits) } catch(e) {}
+    try { if (contact && contact.address !== undefined) renderContact(contact) } catch(e) {}
+    try { if (config && (config.hero_tag || config.about_heading)) { applySiteConfig(config); renderHeroPhoto(config.hero_photo) } } catch(e) {}
   }).catch(function(){})
 })();
 
