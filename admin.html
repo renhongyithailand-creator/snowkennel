@@ -93,7 +93,8 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f2ed;c
     <button class="tab-btn active" data-tab="tab-dogs">种犬管理</button>
     <button class="tab-btn" data-tab="tab-contact">联系方式</button>
     <button class="tab-btn" data-tab="tab-gallery">照片墙</button>
-    <button class="tab-btn" data-tab="tab-config">网站设置</button>
+    <button class="tab-btn" data-tab="tab-traits">犬种特性</button>
+    <button class="tab-btn" data-tab="tab-config">页面内容</button>
   </div>
 
   <!-- 种犬管理 -->
@@ -102,7 +103,11 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f2ed;c
     <div id="dogList"></div>
   </div>
 
-  <!-- 联系方式 -->
+  <!-- 犬种特性 -->
+  <div class="tab-content" id="tab-traits">
+    <button class="add-btn" onclick="openTraitForm()">+ 添加特性</button>
+    <div id="traitList"></div>
+  </div>
   <div class="tab-content" id="tab-contact">
     <div id="contactForm"></div>
   </div>
@@ -113,7 +118,7 @@ body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f5f2ed;c
     <div id="galleryList"></div>
   </div>
 
-  <!-- 网站设置 -->
+  <!-- 页面内容 -->
   <div class="tab-content" id="tab-config">
     <div id="configForm"></div>
   </div>
@@ -351,41 +356,140 @@ async function deleteGallery(id, label) {
 }
 
 // ═══════════════════════════════════════════
-// 网站设置
+// 犬种特性管理
+// ═══════════════════════════════════════════
+async function loadTraits() {
+  const { data } = await sb.from('breed_traits').select('*').order('sort_order')
+  const list = document.getElementById('traitList')
+  if (!data || data.length === 0) { list.innerHTML = '<div class="empty">暂无特性</div>'; return }
+  list.innerHTML = data.map(t => `
+    <div class="list-item">
+      <div class="info">
+        <div class="name">${t.icon} ${t.title} <span style="color:#8c8278;font-weight:normal">${t.en_label}</span></div>
+        <div class="detail">${t.description}</div>
+      </div>
+      <div class="actions">
+        <button class="edit-btn" onclick="openTraitForm(${t.id})">编辑</button>
+        <button class="del-btn" onclick="deleteTrait(${t.id},'${t.title}')">删除</button>
+      </div>
+    </div>
+  `).join('')
+}
+
+async function openTraitForm(id) {
+  let t = { icon:'🐕', title:'', en_label:'', description:'', sort_order:0 }
+  if (id) { const { data } = await sb.from('breed_traits').select('*').eq('id', id).single(); if (data) t = data }
+  document.getElementById('modalContent').innerHTML = `
+    <h3>${id ? '编辑特性' : '添加特性'}</h3>
+    <label>图标(emoji)</label><input id="t_icon" value="${esc(t.icon)}">
+    <label>中文标题</label><input id="t_title" value="${esc(t.title)}">
+    <label>英文标题</label><input id="t_en" value="${esc(t.en_label)}">
+    <label>描述</label><textarea id="t_desc">${esc(t.description)}</textarea>
+    <div class="btns">
+      <button class="cancel-btn" onclick="closeModal()">取消</button>
+      <button class="save-btn" onclick="saveTrait(${id||0})">保存</button>
+    </div>
+  `
+  document.getElementById('modal').classList.add('show')
+}
+
+async function saveTrait(id) {
+  const row = { icon: document.getElementById('t_icon').value, title: document.getElementById('t_title').value, en_label: document.getElementById('t_en').value, description: document.getElementById('t_desc').value }
+  let error
+  if (id) { ({ error } = await sb.from('breed_traits').update(row).eq('id', id)) }
+  else { ({ error } = await sb.from('breed_traits').insert(row)) }
+  if (error) { showMsg('保存失败: '+error.message, 'err'); return }
+  closeModal(); loadTraits(); showMsg('保存成功', 'ok')
+}
+
+async function deleteTrait(id, title) {
+  if (!confirm('确定删除「' + title + '」？')) return
+  await sb.from('breed_traits').delete().eq('id', id)
+  loadTraits(); showMsg('已删除', 'ok')
+}
+
+// 页面内容管理
 // ═══════════════════════════════════════════
 async function loadConfig() {
   const { data } = await sb.from('site_config').select('*').limit(1).single()
-  const c = data || { id:0, hero_photo:'', about_photo:'' }
+  const c = data || {}
+  const f = (key, def) => esc(c[key] !== undefined ? c[key] : def)
   document.getElementById('configForm').innerHTML = `
-    <label>Hero 背景圆形照片路径</label><input id="s_hero" value="${esc(c.hero_photo)}" placeholder="如 logo.jpg 或留空">
-    <label>关于我们照片路径</label><input id="s_about" value="${esc(c.about_photo)}" placeholder="如 images/kennel.jpg 或留空">
-    <button class="add-btn" onclick="saveConfig(${c.id})" style="margin-top:14px">保存设置</button>
+    <h3 style="margin-bottom:16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">🖼️ Hero 区域</h3>
+    <label>标签文字</label><input id="cf_hero_tag" value="${f('hero_tag','Giant Schnauzer · 专业繁育')}">
+    <label>描述文字（&lt;br&gt;换行）</label><textarea id="cf_hero_desc" style="height:60px">${f('hero_desc','致力于繁育<strong>体型优美、性格稳定</strong>的巨型雪纳瑞<br>每一只幼犬，都是我们用心呵护的家人')}</textarea>
+    <label>背景圆形照片</label><input id="cf_hero_photo" value="${f('hero_photo','logo.jpg')}">
+
+    <h3 style="margin:24px 0 16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">📖 关于我们</h3>
+    <label>英文标签</label><input id="cf_about_label_en" value="${f('about_label_en','About Us')}">
+    <label>中文标签</label><input id="cf_about_label_cn" value="${f('about_label_cn','关于思糯')}">
+    <label>英文副标题</label><input id="cf_about_sub_en" value="${f('about_subtitle_en','Our Story')}">
+    <label>标题(h3)</label><input id="cf_about_heading" value="${f('about_heading','以爱之名，繁育品质')}">
+    <label>正文（段落用空行分隔）</label><textarea id="cf_about_text" style="height:120px">${f('about_text','思糯犬舍坐落于环境优美的郊外，拥有宽敞的活动空间和专业的犬舍设施。我们专注巨型雪纳瑞单一犬种的繁育与养护，坚持科学喂养、健康优先的理念。\n\n每一只种犬均经过严格的健康筛查和性格评估，确保后代不仅拥有标准优美的体型结构，更具备稳定亲人的性格特质。\n\n多年来，我们坚持以最高的动物福利标准对待每一只犬只。')}</textarea>
+    <label>底部英文</label><input id="cf_about_footer" value="${f('about_footer','Breeding with love, raising with care')}">
+    <label>照片路径</label><input id="cf_about_photo" value="${f('about_photo','')}">
+
+    <h3 style="margin:24px 0 16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">🏷️ 区块标题</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label>犬种介绍-英文标签</label><input id="cf_breed_label_en" value="${f('breed_label_en','Breed')}"></div>
+      <div><label>犬种介绍-中文标签</label><input id="cf_breed_label_cn" value="${f('breed_label_cn','巨型雪纳瑞')}"></div>
+      <div><label>犬种介绍-英文副标题</label><input id="cf_breed_sub_en" value="${f('breed_subtitle_en','The Giant Schnauzer')}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div><label>种犬展示-英文标签</label><input id="cf_dogs_label_en" value="${f('dogs_label_en','Our Dogs')}"></div>
+      <div><label>种犬展示-中文标签</label><input id="cf_dogs_label_cn" value="${f('dogs_label_cn','种犬展示')}"></div>
+      <div><label>种犬展示-英文副标题</label><input id="cf_dogs_sub_en" value="${f('dogs_subtitle_en','Stud Dogs & Dams')}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div><label>照片墙-英文标签</label><input id="cf_gallery_label_en" value="${f('gallery_label_en','Gallery')}"></div>
+      <div><label>照片墙-中文标签</label><input id="cf_gallery_label_cn" value="${f('gallery_label_cn','犬舍风采')}"></div>
+      <div><label>照片墙-英文副标题</label><input id="cf_gallery_sub_en" value="${f('gallery_subtitle_en','Our Life & Puppies')}"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div><label>联系我们-英文标签</label><input id="cf_contact_label_en" value="${f('contact_label_en','Contact')}"></div>
+      <div><label>联系我们-中文标签</label><input id="cf_contact_label_cn" value="${f('contact_label_cn','联系我们')}"></div>
+      <div><label>联系我们-英文副标题</label><input id="cf_contact_sub_en" value="${f('contact_subtitle_en','Get In Touch')}"></div>
+    </div>
+
+    <h3 style="margin:24px 0 16px;color:#1e1b18;border-bottom:1px solid #e0d8cc;padding-bottom:8px">📞 联系 & 页脚</h3>
+    <label>联系标题</label><input id="cf_contact_heading" value="${f('contact_heading','欢迎预约来访')}">
+    <label>二维码提示</label><input id="cf_qr_hint" value="${f('contact_qr_hint','扫码添加微信，了解更多犬只信息')}">
+    <label>页脚文字</label><input id="cf_footer" value="${f('footer_text','© 2026 思糯犬舍 SNOW KENNEL — 巨型雪纳瑞专业繁育')}">
+
+    <button class="add-btn" onclick="saveConfig(${c.id||0})" style="margin-top:20px;width:100%">💾 保存全部页面内容</button>
   `
 }
 
 async function saveConfig(id) {
+  const get = (elId) => document.getElementById(elId).value
   const row = {
-    hero_photo: document.getElementById('s_hero').value,
-    about_photo: document.getElementById('s_about').value,
+    hero_tag: get('cf_hero_tag'), hero_desc: get('cf_hero_desc'), hero_photo: get('cf_hero_photo'),
+    about_label_en: get('cf_about_label_en'), about_label_cn: get('cf_about_label_cn'), about_subtitle_en: get('cf_about_sub_en'),
+    about_heading: get('cf_about_heading'), about_text: get('cf_about_text'), about_footer: get('cf_about_footer'), about_photo: get('cf_about_photo'),
+    breed_label_en: get('cf_breed_label_en'), breed_label_cn: get('cf_breed_label_cn'), breed_subtitle_en: get('cf_breed_sub_en'),
+    dogs_label_en: get('cf_dogs_label_en'), dogs_label_cn: get('cf_dogs_label_cn'), dogs_subtitle_en: get('cf_dogs_sub_en'),
+    gallery_label_en: get('cf_gallery_label_en'), gallery_label_cn: get('cf_gallery_label_cn'), gallery_subtitle_en: get('cf_gallery_sub_en'),
+    contact_label_en: get('cf_contact_label_en'), contact_label_cn: get('cf_contact_label_cn'), contact_subtitle_en: get('cf_contact_sub_en'),
+    contact_heading: get('cf_contact_heading'), contact_qr_hint: get('cf_qr_hint'), footer_text: get('cf_footer')
   }
   let error
   if (id) { ({ error } = await sb.from('site_config').update(row).eq('id', id)) }
   else { ({ error } = await sb.from('site_config').insert(row)) }
   if (error) { showMsg('保存失败: '+error.message, 'err'); return }
-  showMsg('设置已更新', 'ok')
+  showMsg('页面内容已更新', 'ok')
 }
 
 // ═══════════════════════════════════════════
 // 工具函数
 // ═══════════════════════════════════════════
 function closeModal() { document.getElementById('modal').classList.remove('show') }
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 function showMsg(text, type) {
   const m = document.createElement('div')
   m.className = 'msg ' + (type||'ok'); m.textContent = text; document.body.appendChild(m)
   setTimeout(() => m.remove(), 2500)
 }
-function loadAll() { loadDogs(); loadContact(); loadGallery(); loadConfig() }
+function loadAll() { loadDogs(); loadTraits(); loadContact(); loadGallery(); loadConfig() }
 
 // 关闭弹窗（点击背景）
 document.getElementById('modal').addEventListener('click', function(e) {

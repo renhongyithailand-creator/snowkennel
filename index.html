@@ -289,10 +289,10 @@ body::before {
 <section class="hero">
   <img class="hero-photo" id="heroPhoto" src="" alt="" style="display:none;">
   <div class="hero-content reveal">
-    <p class="hero-tag">Giant Schnauzer · 专业繁育</p>
+    <p class="hero-tag" id="heroTag">Giant Schnauzer · 专业繁育</p>
     <h1 class="hero-title">思糯犬舍<span class="en">SNOW KENNEL</span></h1>
     <div class="hero-line"></div>
-    <p class="hero-desc">致力于繁育<strong>体型优美、性格稳定</strong>的巨型雪纳瑞<br>每一只幼犬，都是我们用心呵护的家人</p>
+    <p class="hero-desc" id="heroDesc">致力于繁育<strong>体型优美、性格稳定</strong>的巨型雪纳瑞<br>每一只幼犬，都是我们用心呵护的家人</p>
   </div>
   <div class="hero-scroll">向下探索</div>
 </section>
@@ -300,18 +300,20 @@ body::before {
 <!-- 关于我们（静态框架） -->
 <section class="section" id="about">
   <div class="container">
-    <p class="section-label reveal">About Us</p>
-    <h2 class="section-title reveal">关于思糯<span class="en">Our Story</span></h2>
+    <p class="section-label reveal" id="aboutLabel">About Us</p>
+    <h2 class="section-title reveal"><span id="aboutLabelCN">关于思糯</span><span class="en" id="aboutSubEn">Our Story</span></h2>
     <div class="divider reveal"></div>
     <div class="about-grid">
       <div class="about-text reveal reveal-d1">
-        <h3>以爱之名，繁育品质</h3>
-        <p>思糯犬舍坐落于环境优美的郊外，拥有宽敞的活动空间和专业的犬舍设施。我们专注巨型雪纳瑞单一犬种的繁育与养护，坚持科学喂养、健康优先的理念。</p>
-        <p>每一只种犬均经过严格的健康筛查和性格评估，确保后代不仅拥有标准优美的体型结构，更具备稳定亲人的性格特质。我们相信，优秀的犬只不仅在于外表，更在于与人类家庭的契合。</p>
-        <p>多年来，我们坚持以最高的动物福利标准对待每一只犬只——充足的户外运动、科学的营养配比、定期的兽医检查，以及最重要的——满满的爱与陪伴。</p>
-        <span class="highlight">— Breeding with love, raising with care</span>
+        <h3 id="aboutHeading">以爱之名，繁育品质</h3>
+        <div id="aboutText">
+          <p>思糯犬舍坐落于环境优美的郊外，拥有宽敞的活动空间和专业的犬舍设施。我们专注巨型雪纳瑞单一犬种的繁育与养护，坚持科学喂养、健康优先的理念。</p>
+          <p>每一只种犬均经过严格的健康筛查和性格评估，确保后代不仅拥有标准优美的体型结构，更具备稳定亲人的性格特质。我们相信，优秀的犬只不仅在于外表，更在于与人类家庭的契合。</p>
+          <p>多年来，我们坚持以最高的动物福利标准对待每一只犬只——充足的户外运动、科学的营养配比、定期的兽医检查，以及最重要的——满满的爱与陪伴。</p>
+        </div>
+        <span class="highlight" id="aboutFooter">— Breeding with love, raising with care</span>
       </div>
-      <div class="about-image reveal reveal-d2" id="aboutPhoto">
+      <div class="about-image reveal reveal-d2" id="aboutPhotoWrap">
         <span class="placeholder-text">犬舍实拍照片<br>Kennel Photo</span>
       </div>
     </div>
@@ -321,8 +323,8 @@ body::before {
 <!-- 犬种介绍 — JS 动态渲染 -->
 <section class="section breed" id="breed">
   <div class="container">
-    <p class="section-label reveal">Breed Introduction</p>
-    <h2 class="section-title reveal">巨型雪纳瑞<span class="en">The Giant Schnauzer</span></h2>
+    <p class="section-label reveal" id="breedLabel">Breed Introduction</p>
+    <h2 class="section-title reveal"><span id="breedLabelCN">巨型雪纳瑞</span><span class="en" id="breedSubEn">The Giant Schnauzer</span></h2>
     <div class="divider reveal"></div>
     <div class="trait-grid" id="traitGrid"><!-- JS 填充 --></div>
   </div>
@@ -331,8 +333,8 @@ body::before {
 <!-- 种犬展示 — JS 动态渲染 -->
 <section class="section" id="dogs">
   <div class="container">
-    <p class="section-label reveal">Our Dogs</p>
-    <h2 class="section-title reveal">种犬展示<span class="en">Stud Dogs & Dams</span></h2>
+    <p class="section-label reveal" id="dogsLabel">Our Dogs</p>
+    <h2 class="section-title reveal"><span id="dogsLabelCN">种犬展示</span><span class="en" id="dogsSubEn">Stud Dogs & Dams</span></h2>
     <div class="divider reveal"></div>
     <div class="dog-grid" id="dogGrid"><!-- JS 填充 --></div>
   </div>
@@ -341,8 +343,8 @@ body::before {
 <!-- 照片墙 — JS 动态渲染 -->
 <section class="section breed" id="gallery">
   <div class="container">
-    <p class="section-label reveal">Gallery</p>
-    <h2 class="section-title reveal">犬舍风采<span class="en">Our Life & Puppies</span></h2>
+    <p class="section-label reveal" id="galleryLabel">Gallery</p>
+    <h2 class="section-title reveal"><span id="galleryLabelCN">犬舍风采</span><span class="en" id="gallerySubEn">Our Life & Puppies</span></h2>
     <div class="divider reveal"></div>
     <div class="gallery-grid" id="galleryGrid"><!-- JS 填充 --></div>
   </div>
@@ -351,8 +353,8 @@ body::before {
 <!-- 联系我们 — JS 动态渲染 -->
 <section class="section contact" id="contact">
   <div class="container">
-    <p class="section-label reveal">Contact</p>
-    <h2 class="section-title reveal">联系我们<span class="en">Get In Touch</span></h2>
+    <p class="section-label reveal" id="contactLabel">Contact</p>
+    <h2 class="section-title reveal"><span id="contactLabelCN">联系我们</span><span class="en" id="contactSubEn">Get In Touch</span></h2>
     <div class="divider reveal"></div>
     <div class="contact-grid" id="contactGrid"><!-- JS 填充 --></div>
   </div>
@@ -361,7 +363,7 @@ body::before {
 <!-- 页脚 -->
 <footer class="footer">
   <div class="container">
-    <p>&copy; 2026 <span class="brand">思糯犬舍 SNOW KENNEL</span> — 巨型雪纳瑞专业繁育</p>
+    <p id="footerText">&copy; 2026 <span class="brand">思糯犬舍 SNOW KENNEL</span> — 巨型雪纳瑞专业繁育</p>
     <p style="font-size:0.7rem;margin-top:4px;opacity:0.5;">备案号待添加</p>
   </div>
 </footer>
@@ -452,7 +454,7 @@ var SITE_DATA = {
       { icon: '💬', label: '微信咨询',  value: '（请填写您的微信号）' }
     ],
     qrPhoto: '',  // ← 填微信二维码图片路径
-    qrHint: '扫码添加微信，了解更多犬只信息'
+    qrHint: '<span id="qrHint">扫码添加微信，了解更多犬只信息</span>'
   }
 
 };
@@ -474,20 +476,60 @@ var SITE_DATA = {
   // ── 辅助 ──
   function hasImg(path) { return path && path.trim().length > 0 }
 
-  // ── 渲染犬种特性（静态内容，不从数据库读）──
-  function renderTraits() {
+  // ── 渲染犬种特性 ──
+  function renderTraits(traits) {
     var grid = document.getElementById('traitGrid')
-    SITE_DATA.traits.forEach(function(t, i) {
+    grid.innerHTML = ''
+    traits.forEach(function(t, i) {
       var card = document.createElement('div')
       card.className = 'trait-card reveal reveal-d' + (i + 1)
       card.innerHTML =
         '<span class="trait-icon">' + t.icon + '</span>' +
         '<h4>' + t.title + '</h4>' +
-        '<span class="en-label">' + t.en + '</span>' +
-        '<p>' + t.desc + '</p>'
+        '<span class="en-label">' + t.en_label + '</span>' +
+        '<p>' + t.description + '</p>'
       grid.appendChild(card)
     })
   }
+
+  // ── 填充页面文字（从 site_config）──
+  function applySiteConfig(cfg) {
+    if (!cfg) return
+    setHtml('heroTag', cfg.hero_tag)
+    setHtml('heroDesc', cfg.hero_desc)
+    setHtml('aboutLabel', cfg.about_label_en)
+    setHtml('aboutLabelCN', cfg.about_label_cn)
+    setHtml('aboutSubEn', cfg.about_subtitle_en)
+    setHtml('aboutHeading', cfg.about_heading)
+    setHtml('aboutFooter', '— ' + cfg.about_footer)
+    setHtml('breedLabel', cfg.breed_label_en)
+    setHtml('breedLabelCN', cfg.breed_label_cn)
+    setHtml('breedSubEn', cfg.breed_subtitle_en)
+    setHtml('dogsLabel', cfg.dogs_label_en)
+    setHtml('dogsLabelCN', cfg.dogs_label_cn)
+    setHtml('dogsSubEn', cfg.dogs_subtitle_en)
+    setHtml('galleryLabel', cfg.gallery_label_en)
+    setHtml('galleryLabelCN', cfg.gallery_label_cn)
+    setHtml('gallerySubEn', cfg.gallery_subtitle_en)
+    setHtml('contactLabel', cfg.contact_label_en)
+    setHtml('contactLabelCN', cfg.contact_label_cn)
+    setHtml('contactSubEn', cfg.contact_subtitle_en)
+    setHtml('contactHeading', cfg.contact_heading)
+    setHtml('qrHint', cfg.contact_qr_hint)
+    setHtml('footerText', cfg.footer_text)
+    // 关于我们正文
+    if (cfg.about_text) {
+      var paragraphs = cfg.about_text.split('\n').filter(function(p) { return p.trim() })
+      setHtml('aboutText', paragraphs.map(function(p) { return '<p>' + p.trim() + '</p>' }).join(''))
+    }
+    // 关于我们照片
+    if (hasImg(cfg.about_photo)) {
+      var wrap = document.getElementById('aboutPhotoWrap')
+      wrap.className = 'about-image reveal reveal-d2 has-photo'
+      wrap.innerHTML = '<img src="' + cfg.about_photo + '" alt="犬舍照片">'
+    }
+  }
+  function setHtml(id, val) { if (val !== undefined) { var el = document.getElementById(id); if (el) el.innerHTML = val } }
 
   // ── 渲染 Hero 照片 ──
   function renderHeroPhoto(url) {
@@ -557,7 +599,7 @@ var SITE_DATA = {
     ]
     var infoDiv = document.createElement('div')
     infoDiv.className = 'contact-info reveal reveal-d1'
-    infoDiv.innerHTML = '<h4>欢迎预约来访</h4>' + items.map(function(c) {
+    infoDiv.innerHTML = '<h4 id="contactHeading">欢迎预约来访</h4>' + items.map(function(c) {
       return '<div class="contact-item">' +
         '<span class="contact-icon">' + c.icon + '</span>' +
         '<div><span class="clabel">' + c.label + '</span><span class="cvalue">' + c.value + '</span></div>' +
@@ -570,62 +612,67 @@ var SITE_DATA = {
     if (hasImg(c.qr_photo)) {
       qrDiv.innerHTML =
         '<div class="qr-placeholder has-qr"><img src="' + c.qr_photo + '" alt="微信二维码"></div>' +
-        '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">扫码添加微信，了解更多犬只信息</p>'
+        '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;"><span id="qrHint">扫码添加微信，了解更多犬只信息</span></p>'
     } else {
       qrDiv.innerHTML =
         '<div class="qr-placeholder"><span class="qr-icon">⬜</span><span class="qr-text">微信二维码<br>WeChat QR</span></div>' +
-        '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;">扫码添加微信，了解更多犬只信息</p>'
+        '<p style="font-size:0.7rem;color:var(--muted);margin-top:12px;text-align:center;letter-spacing:0.04em;"><span id="qrHint">扫码添加微信，了解更多犬只信息</span></p>'
     }
     grid.appendChild(qrDiv)
   }
 
   // ── 主流程：从 Supabase 读取，失败则用本地数据 ──
   async function loadData() {
-    // 先渲染静态内容
-    renderTraits()
-
     try {
       // 并行读取 Supabase
       var results = await Promise.allSettled([
         sb.from('dogs').select('*').order('sort_order'),
         sb.from('gallery').select('*').order('sort_order'),
         sb.from('contacts').select('*').limit(1).single(),
-        sb.from('site_config').select('*').limit(1).single()
+        sb.from('site_config').select('*').limit(1).single(),
+        sb.from('breed_traits').select('*').order('sort_order')
       ])
 
       // 种犬
       if (results[0].status === 'fulfilled' && results[0].value.data) {
         renderDogs(results[0].value.data)
-      } else {
-        renderDogs(SITE_DATA.dogs)
-      }
+      } else { renderDogs(SITE_DATA.dogs) }
 
       // 照片墙
       if (results[1].status === 'fulfilled' && results[1].value.data) {
         renderGallery(results[1].value.data)
-      } else {
-        renderGallery(SITE_DATA.gallery)
-      }
+      } else { renderGallery(SITE_DATA.gallery) }
 
       // 联系方式
       if (results[2].status === 'fulfilled' && results[2].value.data) {
-        renderContact(results[2].value.data)
+        var cd = results[2].value.data
+        renderContact(cd)
       } else {
         var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
         renderContact(c)
       }
 
-      // Hero 照片
+      // 网站设置 & Hero
       if (results[3].status === 'fulfilled' && results[3].value.data) {
-        renderHeroPhoto(results[3].value.data.hero_photo)
+        var cfg = results[3].value.data
+        applySiteConfig(cfg)
+        renderHeroPhoto(cfg.hero_photo)
       } else {
+        applySiteConfig(null)
         renderHeroPhoto(SITE_DATA.heroPhoto)
       }
 
+      // 犬种特性
+      if (results[4].status === 'fulfilled' && results[4].value.data && results[4].value.data.length > 0) {
+        renderTraits(results[4].value.data)
+      } else {
+        renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
+      }
+
     } catch(e) {
-      // 数据库完全连不上，全部用本地数据
       renderDogs(SITE_DATA.dogs)
       renderGallery(SITE_DATA.gallery)
+      renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
       var c = { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
       renderContact(c)
       renderHeroPhoto(SITE_DATA.heroPhoto)
