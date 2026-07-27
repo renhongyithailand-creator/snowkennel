@@ -482,6 +482,7 @@ var SITE_DATA = {
   // ── 渲染犬种特性 ──
   function renderTraits(traits) {
     var grid = document.getElementById('traitGrid')
+    if (!grid || !traits || !traits.length) return
     grid.innerHTML = ''
     traits.forEach(function(t, i) {
       var card = document.createElement('div')
@@ -550,6 +551,7 @@ var SITE_DATA = {
   // ── 渲染种犬 ──
   function renderDogs(dogs) {
     var grid = document.getElementById('dogGrid')
+    if (!grid || !dogs || !dogs.length) return
     grid.innerHTML = ''
     dogs.forEach(function(d, i) {
       var card = document.createElement('div')
@@ -578,6 +580,7 @@ var SITE_DATA = {
   // ── 渲染照片墙 ──
   function renderGallery(items) {
     var grid = document.getElementById('galleryGrid')
+    if (!grid || !items || !items.length) return
     grid.innerHTML = ''
     items.forEach(function(g, i) {
       var item = document.createElement('div')
@@ -595,7 +598,9 @@ var SITE_DATA = {
 
   // ── 渲染联系信息 ──
   function renderContact(c) {
+    c = c || {}
     var grid = document.getElementById('contactGrid')
+    if (!grid) return
     grid.innerHTML = ''
     var items = [
       { icon: '📍', label: '犬舍地址', value: c.address || '' },
