@@ -1,7 +1,9 @@
 backend:
-  name: git-gateway
+  name: github
   repo: renhongyithailand-creator/snowkennel
   branch: main
+  base_url: https://snowkennel-oauth.renhongyithailand.workers.dev
+  auth_endpoint: /auth
 
 # 上传的图片保存在仓库的 images/ 目录
 media_folder: "images"
