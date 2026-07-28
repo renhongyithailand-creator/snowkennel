@@ -6,6 +6,19 @@
   <title>内容管理 · 思糯犬舍</title>
 </head>
 <body>
-  <script src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js"></script>
-  </body>
+  <p id="status" style="font-family:sans-serif;padding:20px;">加载CMS中...</p>
+  <script>
+    var s = document.getElementById('status');
+    function log(m) { s.innerHTML += '<br>' + m; }
+    window.addEventListener('message', function(e) {
+      log('收到消息: ' + JSON.stringify(e.data));
+      log('来源: ' + e.origin);
+    });
+  </script>
+  <script
+    src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js"
+    onload="log('CMS加载成功')"
+    onerror="log('CMS加载失败!')"
+  ></script>
+</body>
 </html>
