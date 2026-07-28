@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html><head><meta charset="utf-8"></head><body>
-<h2>登录回调</h2>
-<p id="log"></p>
+<h2>诊断信息（请不要关闭此窗口）</h2>
+<pre id="log" style="background:#eee;padding:20px;font-size:14px;"></pre>
 <script>
 var logEl = document.getElementById('log');
 function log(m) { logEl.textContent += m + '\n'; }
-log('URL hash: ' + location.hash);
-log('window.opener: ' + (window.opener ? '✅ 存在' : '❌ null'));
-var token = location.hash.substring(1);
+log('页面加载完成');
+log('location.hash: "' + location.hash + '"');
+log('window.opener: ' + (window.opener ? '存在' : '❌ NULL'));
+var token = location.hash.replace('#', '');
 if (token && window.opener) {
-  log('发送 postMessage...');
-  window.opener.postMessage({token: token}, '*');
-  log('postMessage 已发送');
-  log('3秒后关闭此窗口');
-  setTimeout(function(){ window.close(); }, 3000);
-} else if (!token) {
-  log('❌ 没有 token');
+  log('token 长度: ' + token.length);
+  log('准备发送 postMessage...');
+  try {
+    window.opener.postMessage({token: token}, '*');
+    log('✅ postMessage 已发送');
+  } catch(e) {
+    log('❌ postMessage 失败: ' + e.message);
+  }
 } else {
-  log('❌ window.opener 不存在，可能是浏览器拦截了弹窗');
-  log('请手动复制 token 并关闭窗口');
+  log('❌ 无法发送 postMessage');
 }
+log('\n请截图发给开发者');
 </script>
 </body></html>
