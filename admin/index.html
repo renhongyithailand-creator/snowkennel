@@ -6,38 +6,6 @@
   <title>内容管理 · 思糯犬舍</title>
 </head>
 <body>
-  <p id="s" style="padding:40px;font-family:sans-serif;">⏳ 加载中…</p>
-  <script>
-    var s = document.getElementById('s');
-    function log(m) { s.textContent += '\n' + m; }
-
-    // 从 URL hash 读取 token
-    var hash = location.hash;
-    if (hash && hash.indexOf('token=') === 1) {
-      var token = hash.substring(7); // 去掉 #token=
-      log('✅ Token 已获取: ' + token.substring(0,10) + '...');
-
-      // 存入 Netlify CMS v2 的 GitHub backend 格式
-      // CMS 会从 localStorage 读取这个来验证登录状态
-      try {
-        localStorage.setItem('netlify-cms-user', JSON.stringify({
-          token: token,
-          provider: 'github',
-          backendName: 'github'
-        }));
-        log('✅ Token 已存储');
-      } catch(e) {
-        log('❌ 存储失败: ' + e.message);
-      }
-
-      // 清除 URL 中的 token
-      history.replaceState(null, '', location.pathname);
-    } else {
-      log('ℹ️ 未登录，请点击下方按钮');
-    }
-  </script>
-  <script src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js"
-    onload="log('✅ CMS 已加载')"
-    onerror="log('❌ CMS 加载失败')"></script>
+  <script src="https://unpkg.com/netlify-cms@2.10.192/dist/netlify-cms.js"></script>
 </body>
 </html>

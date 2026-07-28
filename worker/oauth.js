@@ -6,7 +6,6 @@ export default {
     var url = new URL(request.url)
     var path = url.pathname
 
-    // /auth — 跳转 GitHub 授权
     if (path === '/auth') {
       var state = crypto.randomUUID()
       var authUrl = 'https://github.com/login/oauth/authorize' +
@@ -17,11 +16,10 @@ export default {
       return Response.redirect(authUrl, 302)
     }
 
-    // /callback — GitHub 回调，换 token，然后刷新主窗口
     if (path === '/callback') {
       var code = url.searchParams.get('code')
       if (!code) {
-        return new Response('未收到授权码', { status: 400,
+        return new Response('Error: no code', { status: 400,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
       }
 
@@ -38,25 +36,31 @@ export default {
 
         var tokenData = await tokenResp.json()
 
-        if (!tokenData.access_token) {
-          return new Response('获取 token 失败: ' + JSON.stringify(tokenData), { status: 500,
-            headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+        if (tokenData.error || !tokenData.access_token) {
+          return new Response(
+            '<!doctype html><h1>登录失败</h1><p>' + (tokenData.error_description || '未知错误') + '</p>',
+            { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+          )
         }
 
-        // 重定向主窗口到 admin 页面（带 token），关闭弹窗
-        var html = '<!DOCTYPE html><html><head><meta charset="utf-8"></head><body>' +
+        // Netlify CMS v2 需要的消息格式: { token: "..." }
+        var html = '<!doctype html><html><head><meta charset="utf-8"></head><body>' +
+          '<h2>✅ 登录成功</h2>' +
           '<script>' +
-          'window.opener.location.href="https://www.snowkennel.com/admin/index.html#token=' + tokenData.access_token + '";' +
-          'window.close();' +
+          '(function(){' +
+          'var win=window.opener||window.parent;' +
+          'win.postMessage({token:"' + tokenData.access_token + '"},"*");' +
+          'setTimeout(function(){window.close()},1000);' +
+          '})();' +
           '</script></body></html>'
         return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 
       } catch (e) {
-        return new Response('错误: ' + e.message, { status: 500,
+        return new Response('Error: ' + e.message, { status: 500,
           headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
       }
     }
 
-    return new Response('Snow Kennel OAuth ✅')
+    return new Response('OK', { headers: { 'Content-Type': 'text/plain' } })
   }
 }
