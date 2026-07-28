@@ -1,0 +1,20 @@
+{"traits": [
+  {
+    "icon": "🛡️",
+    "title": "忠诚护卫",
+    "en_label": "Loyal Guardian",
+    "description": "天生具有护卫本能，对家人极度忠诚。警觉勇敢却不具攻击性，是理想的工作犬与家庭伴侣犬。"
+  },
+  {
+    "icon": "🧠",
+    "title": "聪明机敏",
+    "en_label": "Highly Intelligent",
+    "description": "犬类智商排名前列，学习能力强，服从性好。需要适量的脑力刺激和训练来保持身心平衡。"
+  },
+  {
+    "icon": "⚡",
+    "title": "活力充沛",
+    "en_label": "Energetic & Robust",
+    "description": "体格强壮、耐力出众，适合活跃的家庭。每日充足运动能让它们保持愉悦和健康的体态。"
+  }
+]}

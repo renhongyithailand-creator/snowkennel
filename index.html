@@ -440,8 +440,8 @@ var SITE_DATA = {
 
 /*
  * ╔══════════════════════════════════════════════════╗
- * ║  [网页专属] 渲染引擎 — 优先从 Supabase 读取  ║
- * ║  数据库连接失败时自动降级使用本地 SITE_DATA   ║
+ * ║  [网页专属] 渲染引擎 — 优先读取 JSON 数据文件  ║
+ * ║  请求失败时自动降级使用内联 SITE_DATA          ║
  * ╚══════════════════════════════════════════════════╝
  */
 (function() {
@@ -601,42 +601,55 @@ var SITE_DATA = {
     grid.appendChild(qrDiv)
   }
 
-  // ── 主流程：从 Supabase 读取，失败则用本地数据 ──
-  // ── 辅助：SITE_DATA 转联系格式 ──
-  function fallbackContact() {
-    return { address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto }
+  // ── 主流程：从 JSON 文件读取，失败则用本地 SITE_DATA 降级 ──
+  function renderAll() {
+    Promise.all([
+      fetch('/data/settings.json').then(function(r) { return r.json() }),
+      fetch('/data/dogs.json').then(function(r) { return r.json() }),
+      fetch('/data/gallery.json').then(function(r) { return r.json() }),
+      fetch('/data/traits.json').then(function(r) { return r.json() })
+    ]).then(function(results) {
+      var s = results[0], dogs = results[1].dogs, gallery = results[2].gallery, traits = results[3].traits
+      renderDogs(dogs)
+      renderGallery(gallery)
+      renderTraits(traits)
+      renderHeroPhoto(s.hero.photo)
+      renderContact({ address: s.contact.address, phone: s.contact.phone, email: s.contact.email, wechat: s.contact.wechat, qr_photo: s.contact.qr_photo })
+      applySiteConfig({
+        hero_tag: s.hero.tag, hero_desc: s.hero.desc,
+        about_label_en: s.about.label_en, about_label_cn: s.about.label_cn,
+        about_subtitle_en: s.about.subtitle_en, about_heading: s.about.heading,
+        about_text: s.about.text, about_footer: s.about.footer, about_photo: s.about.photo,
+        breed_label_en: s.labels.breed_label_en, breed_label_cn: s.labels.breed_label_cn,
+        breed_subtitle_en: s.labels.breed_subtitle_en,
+        dogs_label_en: s.labels.dogs_label_en, dogs_label_cn: s.labels.dogs_label_cn,
+        dogs_subtitle_en: s.labels.dogs_subtitle_en,
+        gallery_label_en: s.labels.gallery_label_en, gallery_label_cn: s.labels.gallery_label_cn,
+        gallery_subtitle_en: s.labels.gallery_subtitle_en,
+        contact_label_en: s.labels.contact_label_en, contact_label_cn: s.labels.contact_label_cn,
+        contact_subtitle_en: s.labels.contact_subtitle_en,
+        contact_heading: s.contact.heading, contact_qr_hint: s.contact.qr_hint,
+        footer_text: s.footer.text
+      })
+    }).catch(function() {
+      // 降级：JSON 请求失败时用内联 SITE_DATA
+      var dogs = SITE_DATA.dogs.map(function(d) {
+        return { name: d.name, name_en: d.en || '', title: d.title || '',
+          description: d.desc || '', photo: d.photo || '',
+          height: (d.stats && d.stats[0]) ? d.stats[0].val : '',
+          weight: (d.stats && d.stats[1]) ? d.stats[1].val : '',
+          genetics: (d.stats && d.stats[2]) ? d.stats[2].val : '' }
+      })
+      renderDogs(dogs)
+      renderGallery(SITE_DATA.gallery.map(function(g) { return { label: g.label, layout: g.layout || '', photo: g.photo || '' } }))
+      renderTraits(SITE_DATA.traits.map(function(t) { return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc } }))
+      renderContact({ address: SITE_DATA.contact.items[0].value, phone: SITE_DATA.contact.items[1].value, email: SITE_DATA.contact.items[2].value, wechat: SITE_DATA.contact.items[3].value, qr_photo: SITE_DATA.contact.qrPhoto })
+      renderHeroPhoto(SITE_DATA.heroPhoto)
+    })
   }
 
-  // ── 先用本地数据显示，不怕数据库失败 ──
-  function renderAllFromLocal() {
-    // 转换 SITE_DATA 的 dogs 格式 → 数据库格式
-    var dogs = SITE_DATA.dogs.map(function(d) {
-      return {
-        name: d.name, name_en: d.en || '', title: d.title || '',
-        description: d.desc || '', photo: d.photo || '',
-        height: (d.stats && d.stats[0]) ? d.stats[0].val : '',
-        weight: (d.stats && d.stats[1]) ? d.stats[1].val : '',
-        genetics: (d.stats && d.stats[2]) ? d.stats[2].val : ''
-      }
-    })
-    // 转换 gallery
-    var gallery = SITE_DATA.gallery.map(function(g) {
-      return { label: g.label, layout: g.layout || '', photo: g.photo || '' }
-    })
-    // 转换 traits
-    var traits = SITE_DATA.traits.map(function(t) {
-      return { icon: t.icon, title: t.title, en_label: t.en, description: t.desc }
-    })
-
-    renderDogs(dogs)
-    renderGallery(gallery)
-    renderTraits(traits)
-    renderContact(fallbackContact())
-    renderHeroPhoto(SITE_DATA.heroPhoto)
-  }
-
-  // 渲染本地数据
-  renderAllFromLocal()
+  // 启动渲染（优先 JSON，失败降级 SITE_DATA）
+  renderAll()
 })();
 
 

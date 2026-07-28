@@ -1,0 +1,12 @@
+# Cloudflare Worker — Decap CMS GitHub OAuth 代理
+#
+# 工作原理：
+# /auth  → GitHub 授权页面
+# /callback → GitHub 回调，返回 token 给 Decap CMS
+
+name = "snowkennel-oauth"
+main = "oauth.js"
+compatibility_date = "2024-01-01"
+
+# 部署到 Cloudflare 后会自动分配一个 workers.dev 域名
+# 也可以在 Cloudflare Dashboard 绑定自定义域名
