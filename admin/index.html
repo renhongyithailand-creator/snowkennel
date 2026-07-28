@@ -4,35 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>内容管理 · 思糯犬舍</title>
-  <style>body{margin:0;min-height:100vh;background:#faf7f2}</style>
 </head>
 <body>
-  <div id="debug" style="padding:40px;font-family:monospace;font-size:14px;color:#333;">
-    <p>⏳ 正在初始化…</p>
-  </div>
-  <script>
-    var debug = document.getElementById('debug');
-    function log(msg) { debug.innerHTML += '<p>' + msg + '</p>'; }
-
-    // 监听 postMessage
-    window.addEventListener('message', function(e) {
-      log('📨 收到消息: ' + JSON.stringify(e.data).substring(0, 200));
-    });
-
-    // 5秒后检查 CMS 状态
-    setTimeout(function() {
-      log('检查 CMS 全局对象: ' + (typeof window.CMS !== 'undefined' ? '✅ 存在' : '❌ 不存在'));
-      if (typeof window.CMS !== 'undefined') {
-        log('CMS 类型: ' + typeof window.CMS);
-      }
-      // 检查页面是否有内容
-      var bodyHtml = document.body.innerHTML;
-      var rootEl = document.getElementById('nc-root');
-      log('页面元素: nc-root=' + !!rootEl + ', body长度=' + bodyHtml.length);
-    }, 5000);
-  </script>
-  <script src="https://unpkg.com/decap-cms@3/dist/decap-cms.js"
-    onload="log('✅ Decap CMS JS 加载完成')"
-    onerror="log('❌ JS 加载失败')"></script>
+  <script src="https://unpkg.com/decap-cms@3/dist/decap-cms.js"></script>
 </body>
 </html>
